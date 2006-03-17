@@ -1,0 +1,3 @@
+\contentsline {section}{\numberline {1}Overview}{1}
+\contentsline {section}{\numberline {2}Main {\texttt {clustvarsel}} function}{2}
+\contentsline {section}{\numberline {3}Adjustments for Speeding Up Algorithm}{6}

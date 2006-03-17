@@ -1,0 +1,37 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Badsberg}{Badsberg}{1992}]{badsberg92}
+Badsberg, J.~H. (1992).
+\newblock Model search in contingency tables by {C}o{C}o.
+\newblock In Y.~Dodge and J.~Whittaker (Eds.), {\em Computational Statistics},
+  Volume~1, pp.\  251--256.
+
+\bibitem[\protect\citeauthoryear{Fraley and Raftery}{Fraley and
+  Raftery}{2002a}]{fraley02}
+Fraley, C. and A.~E. Raftery (2002a, October).
+\newblock Mclust:software for model-based clustering, density estimation and
+  discriminant analysis.
+\newblock Technical Report 415, University of Washington.
+
+\bibitem[\protect\citeauthoryear{Fraley and Raftery}{Fraley and
+  Raftery}{2002b}]{FraleyRaftery2002}
+Fraley, C. and A.~E. Raftery (2002b).
+\newblock Model-based clustering, discriminant analysis, and density
+  estimation.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 97},
+  611--631.
+
+\bibitem[\protect\citeauthoryear{Miller}{Miller}{1990}]{miller90}
+Miller, A.~J. (1990).
+\newblock {\em Subset Selection in Regression}.
+\newblock Number~40 in Monographs on Statistics and Applied Probability.
+  Chapman and Hall.
+
+\bibitem[\protect\citeauthoryear{Raftery and Dean}{Raftery and
+  Dean}{2004}]{raftery04}
+Raftery, A.~E. and N.~Dean (2004).
+\newblock Variable selection for model-based clustering.
+\newblock Technical Report 452, Department of Statistics, University of
+  Washington.
+
+\end{thebibliography}
