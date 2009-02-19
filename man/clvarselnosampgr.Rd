@@ -93,7 +93,7 @@ steps run in the algorithm can be changed by setting the variables
 \url{http://www.stat.washington.edu/www/research/reports/2004/tr452.pdf}
 }
 \author{N. Dean and A. E. Raftery}
-\seealso{\code{\link{clustvarsel}}, \code{\link{clvarselsampgr}}, \code{\link{clvarselnosamphl}}, \code{\link{clvarselsamphl}}, \code{\link[mclust]{EMclust}} }
+\seealso{\code{\link{clustvarsel}}, \code{\link{clvarselsampgr}}, \code{\link{clvarselnosamphl}}, \code{\link{clvarselsamphl}}, \code{\link[mclust02]{EMclust}} }
 \examples{
 #Create 3-d data with 2 clusters in the first two variables and no
 #clustering in the rest

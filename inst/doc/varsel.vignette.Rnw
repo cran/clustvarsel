@@ -14,7 +14,7 @@
 \newcommand{\Rmethod}[1]{{\textit{#1}}}
 \newcommand{\Rfunarg}[1]{{\textit{#1}}}
 %\VignetteIndexEntry{clustvarsel Overview}
-%\VignetteDepends{mclust}
+%\VignetteDepends{mclust02}
 %\VignetteKeywords{Variable selection, Feature selection, Model-based clustering}
 %\VignettePackage{clustvarsel}
 
@@ -29,9 +29,9 @@
 
 The \Rpackage{clustvarsel} package can be used to find the (locally) optimal subset of variables with group/cluster information in a dataset with continuous variables. 
 
-Each variable's evidence for being useful for clustering given the currently selected clustering variables is given by the difference between the BIC for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust) using the set of clustering variables including the variable being checked and the sum of BICs for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust) using the set of clustering variables without the variable being checked and the model for the variable being checked being conditionally independent of the clustering given the other clustering variables (this is modeled as a regression of the variable being checked on the other clustering variables).  
+Each variable's evidence for being useful for clustering given the currently selected clustering variables is given by the difference between the BIC for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust02) using the set of clustering variables including the variable being checked and the sum of BICs for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust02) using the set of clustering variables without the variable being checked and the model for the variable being checked being conditionally independent of the clustering given the other clustering variables (this is modeled as a regression of the variable being checked on the other clustering variables).  
 
-For more details on the model see \citeN{raftery04}, for an overview of model-based clustering see \citeN{FraleyRaftery2002} and for more details on the \Rpackage{mclust} package see \citeN{fraley02} or \url{http://www.stat.washington.edu/mclust/}.
+For more details on the model see \citeN{raftery04}, for an overview of model-based clustering see \citeN{FraleyRaftery2002} and for more details on the \Rpackage{mclust02} package see \citeN{fraley02} or \url{http://www.stat.washington.edu/mclust/}.
 
 Two different search algorithms are available for checking single variables for inclusion into/exclusion from the set of selected clustering variables. The \Rfunarg{``greedy''} search option checks at every inclusion step the inclusion of each single variable not currently selected into the current set of selected clustering variables. The variable that has highest evidence of inclusion is proposed and, if its clustering evidence is stronger than the evidence against clustering it is included. At every exclusion step  the \Rfunarg{``greedy''} search option checks the exclusion of each single variable in the currently selected set of clustering variables and proposes the variable that has lowest evidence of clustering. The proposed variable is removed if its evidence of clustering is weaker than its evidence against clustering.This is similar to the idea for stepwise regression and may suffer from the same instabilities mentioned in \citeN{miller90} inherent in that approach (although this has not been apparent in the simulations and examples tried thus far).
 
@@ -42,13 +42,13 @@ At each inclusion step, the algorithm only checks single variables not currently
 The speed/optimally tradeoff can be changed by increasing or decreasing the different levels, e.g. by setting \Rfunarg{upper} to 10 instead of 0 we require a variable to have stronger evidence of clustering before it is included and by setting \Rfunarg{lower} to 0 we remove variables that at any stage have evidence of clustering weaker by any amount than evidence against clustering.
 
 \section{Main \Rfunction{clustvarsel} function}
-We begin by loading the package (the required \Rpackage{mclust} package will automatically be loaded at the same time).
+We begin by loading the package (the required \Rpackage{mclust02} package will automatically be loaded at the same time).
 <<>>=
 library(clustvarsel)
 
 @
 
-The basic \Rfunction{clustvarsel}  function has the default settings of using the \Rfunarg{``greedy''} search, not using a subset for the hierarchical clustering phase of cluster model fitting, allowing an equal covariances hierarchical model when variable covariances model gives no viable answers, automatically selecting the first two variables regardless of whether the evidence of univariate/bivariate clustering is greater than not clustering (to provide starting variables) and a maximum number of paired inclusion and exclusion steps of 100. The default options for allowing different covariance parameterizations for both univariate clustering in \Rfunarg{emModels1} and multivariate clustering in \Rfunarg{emModels2} are all possible parameterizations currently available in \Rpackage{mclust} (see the help file for \Rfunction{EMclust} for more details).
+The basic \Rfunction{clustvarsel}  function has the default settings of using the \Rfunarg{``greedy''} search, not using a subset for the hierarchical clustering phase of cluster model fitting, allowing an equal covariances hierarchical model when variable covariances model gives no viable answers, automatically selecting the first two variables regardless of whether the evidence of univariate/bivariate clustering is greater than not clustering (to provide starting variables) and a maximum number of paired inclusion and exclusion steps of 100. The default options for allowing different covariance parameterizations for both univariate clustering in \Rfunarg{emModels1} and multivariate clustering in \Rfunarg{emModels2} are all possible parameterizations currently available in \Rpackage{mclust02} (see the help file for \Rfunction{EMclust} for more details).
 
 The only inputs required are a matrix \Rfunarg{X} of continuous data with rows corresponding to observations and columns (at least 2) corresponding to variables and the maximum number of groups \Rfunarg{G} believed to be possible in the data.
 
@@ -67,7 +67,7 @@ crabscl<-c(rep(1,50),rep(2,50),rep(3,50),rep(4,50))
 
 @
 The pairs plot for X is given in Figure \ref{plot1}.
-First we look at the result from choosing the best model in terms of BIC for clustering on all variables allowing all possible parameterizations and the number of groups to range over 1 to 5 (our maximum number of possible clusters \Rfunarg{G} in the dataset). We cluster the data using \Rfunction{EMclust} from the \Rpackage{mclust} and look at the results using the \Rfunction{summary} function. We then extract the estimated classifications from the best model in terms of BIC from the summary and use \Rfunction{classError} to look at the misclassification error between the current and true classifications. We can use \Rfunction{table} to look at the cross tabulated classifications.
+First we look at the result from choosing the best model in terms of BIC for clustering on all variables allowing all possible parameterizations and the number of groups to range over 1 to 5 (our maximum number of possible clusters \Rfunarg{G} in the dataset). We cluster the data using \Rfunction{EMclust} from the \Rpackage{mclust02} and look at the results using the \Rfunction{summary} function. We then extract the estimated classifications from the best model in terms of BIC from the summary and use \Rfunction{classError} to look at the misclassification error between the current and true classifications. We can use \Rfunction{table} to look at the cross tabulated classifications.
  
 <<>>=
 clust1<-EMclust(X,G=1:5)

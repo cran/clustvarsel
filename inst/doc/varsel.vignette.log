@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2004.9.9)  17 MAR 2006 15:47
+This is pdfTeXk, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2004.9.9)  29 NOV 2006 19:12
  file:line:error style messages enabled.
 **\nonstopmode \input /Users/nemadean/College/varsel/clustvarsel/inst/doc/varse
 l.vignette.tex
@@ -89,6 +89,27 @@ urces/share/texmf/Sweave',
                but the package provides `Sweave'.
 
 Package: Sweave 
+(/sw/share/texmf/tex/latex/fancyvrb/fancyvrb.sty
+Package: fancyvrb 2000/03/21
+
+Style option: `fancyvrb' v2.7, with DG/SPQR fixes <2000/03/21> (tvz)
+\FV@CodeLineNo=\count92
+\FV@InFile=\read1
+\FV@TabBox=\box27
+\c@FancyVerbLine=\count93
+\FV@StepNumber=\count94
+\FV@OutFile=\write3
+)
+(/Library/Frameworks/R.framework/Resources/share/texmf/upquote.sty
+Package: upquote 2003/08/11 v1.1 Covington's upright-quote modification to verb
+atim and verb
+
+(/sw/share/texmf/tex/latex/base/textcomp.sty
+Package: textcomp 2001/06/05 v1.94 Standard LaTeX package
+
+(/sw/share/texmf/tex/latex/base/ts1enc.def
+File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
+)))
 (/sw/share/texmf/tex/latex/base/fontenc.sty
 Package: fontenc 2001/06/05 v1.94 Standard LaTeX package
 
@@ -110,27 +131,6 @@ LaTeX Font Info:    Try loading font information for T1+aer on input line 95.
 
 (/sw/share/texmf/tex/latex/ae/t1aer.fd
 File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
-)))
-(/sw/share/texmf/tex/latex/fancyvrb/fancyvrb.sty
-Package: fancyvrb 2000/03/21
-
-Style option: `fancyvrb' v2.7, with DG/SPQR fixes <2000/03/21> (tvz)
-\FV@CodeLineNo=\count92
-\FV@InFile=\read1
-\FV@TabBox=\box27
-\c@FancyVerbLine=\count93
-\FV@StepNumber=\count94
-\FV@OutFile=\write3
-)
-(/Library/Frameworks/R.framework/Resources/share/texmf/upquote.sty
-Package: upquote 2003/08/11 v1.1 Covington's upright-quote modification to verb
-atim and verb
-
-(/sw/share/texmf/tex/latex/base/textcomp.sty
-Package: textcomp 2001/06/05 v1.94 Standard LaTeX package
-
-(/sw/share/texmf/tex/latex/base/ts1enc.def
-File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 )))) (./varsel.vignette.aux)
 \openout1 = `varsel.vignette.aux'.
 
@@ -246,46 +246,30 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 35.
  [1
 
-{/sw/share/texmf/dvips/config/pdftex.map}]
-LaTeX Font Info:    Try loading font information for TS1+aett on input line 54.
-
-
-(/Library/Frameworks/R.framework/Resources/share/texmf/ts1aett.fd
-File: ts1aett.fd 
-)
-LaTeX Font Info:    Try loading font information for TS1+cmtt on input line 54.
-
-
-(/sw/share/texmf/tex/latex/base/ts1cmtt.fd
-File: ts1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `TS1/aett/m/n' in size <12> not available
-(Font)              Font shape `TS1/cmtt/m/n' tried instead on input line 54.
- [2] [3] [4] [5] [6] [7] [8]
-(./varsel.vignette.bbl) <vignplot1.pdf, id=46, 433.62pt x 433.62pt>
+{/sw/share/texmf/dvips/config/pdftex.map}] [2] [3] [4] [5] [6] [7]
+(./varsel.vignette.bbl) <vignplot1.pdf, id=42, 433.62pt x 433.62pt>
 File: vignplot1.pdf Graphic file (type pdf)
 
-<use vignplot1.pdf> [9] [10 <./vignplot1.pdf>] (./varsel.vignette.aux)
+<use vignplot1.pdf> [8] [9 <./vignplot1.pdf>] (./varsel.vignette.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 2551 strings out of 95437
- 34689 string characters out of 1190296
- 80360 words of memory out of 1000001
- 5509 multiletter control sequences out of 10000+50000
- 30953 words of font info for 68 fonts, out of 500000 for 1000
+ 2529 strings out of 95437
+ 34032 string characters out of 1190296
+ 80669 words of memory out of 1000001
+ 5494 multiletter control sequences out of 10000+50000
+ 30656 words of font info for 67 fonts, out of 500000 for 1000
  14 hyphenation exceptions out of 1000
- 35i,6n,29p,1678b,324s stack positions out of 1500i,500n,5000p,200000b,5000s
- 61 PDF objects out of 300000
+ 35i,6n,29p,1678b,320s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 57 PDF objects out of 300000
  0 named destinations out of 131072
  5 words of extra memory for PDF output out of 65536
- </sw/var/lib/texmf/fonts/pk/ljfour/jknappen/tc/tctt1200.600pk>{/sw/share/tex
-mf/dvips/tetex/09fbbfac.enc}</sw/share/texmf/fonts/type1/bluesky/cm/cmsltt10.pf
-b></sw/share/texmf/fonts/type1/bluesky/cm/cmtt12.pfb>{/sw/share/texmf/dvips/tet
-ex/f7b6d320.enc}</sw/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></sw/share/t
-exmf/fonts/type1/bluesky/cm/cmr12.pfb>{/sw/share/texmf/dvips/tetex/74afc74c.enc
-}</sw/share/texmf/fonts/type1/bluesky/cm/cmti12.pfb></sw/share/texmf/fonts/type
-1/bluesky/cm/cmr17.pfb>
-Output written on varsel.vignette.pdf (10 pages, 325454 bytes).
+{/sw/share/texmf/dvips/tetex/09fbbfac.enc}</sw/share/texmf/fonts/type1/bluesk
+y/cm/cmsltt10.pfb></sw/share/texmf/fonts/type1/bluesky/cm/cmtt12.pfb>{/sw/share
+/texmf/dvips/tetex/f7b6d320.enc}</sw/share/texmf/fonts/type1/bluesky/cm/cmbx12.
+pfb></sw/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb>{/sw/share/texmf/dvips/te
+tex/74afc74c.enc}</sw/share/texmf/fonts/type1/bluesky/cm/cmti12.pfb></sw/share/
+texmf/fonts/type1/bluesky/cm/cmr17.pfb>
+Output written on varsel.vignette.pdf (9 pages, 323844 bytes).

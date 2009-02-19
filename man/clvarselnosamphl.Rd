@@ -101,7 +101,7 @@ steps run in the algorithm can be changed by setting the variables
 J. H. Badsberg (1992). Model search in contingency tables by CoCo. In Y. Dodge and J. Whittaker (Eds.), Computational Statistics, Volume 1, pp. 251-256
  }
 \author{N. Dean and A. E. Raftery}
-\seealso{\code{\link{clustvarsel}}, \code{\link{clvarselsamphl}}, \code{\link{clvarselnosampgr}}, \code{\link{clvarselsampgr}}, \code{\link[mclust]{EMclust}} }
+\seealso{\code{\link{clustvarsel}}, \code{\link{clvarselsamphl}}, \code{\link{clvarselnosampgr}}, \code{\link{clvarselsampgr}}, \code{\link[mclust02]{EMclust}} }
 \examples{
 #Create 3-d data with 2 clusters in the first two variables and no
 #clustering in the rest

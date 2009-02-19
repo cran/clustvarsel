@@ -14,7 +14,7 @@
 \newcommand{\Rmethod}[1]{{\textit{#1}}}
 \newcommand{\Rfunarg}[1]{{\textit{#1}}}
 %\VignetteIndexEntry{clustvarsel Overview}
-%\VignetteDepends{mclust}
+%\VignetteDepends{mclust02}
 %\VignetteKeywords{Variable selection, Feature selection, Model-based clustering}
 %\VignettePackage{clustvarsel}
 
@@ -30,9 +30,9 @@
 
 The \Rpackage{clustvarsel} package can be used to find the (locally) optimal subset of variables with group/cluster information in a dataset with continuous variables. 
 
-Each variable's evidence for being useful for clustering given the currently selected clustering variables is given by the difference between the BIC for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust) using the set of clustering variables including the variable being checked and the sum of BICs for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust) using the set of clustering variables without the variable being checked and the model for the variable being checked being conditionally independent of the clustering given the other clustering variables (this is modeled as a regression of the variable being checked on the other clustering variables).  
+Each variable's evidence for being useful for clustering given the currently selected clustering variables is given by the difference between the BIC for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust02) using the set of clustering variables including the variable being checked and the sum of BICs for the model with clustering (allowed to vary over 2 to a maximum number of groups and any of the different covariance parameterizations allowed in mclust02) using the set of clustering variables without the variable being checked and the model for the variable being checked being conditionally independent of the clustering given the other clustering variables (this is modeled as a regression of the variable being checked on the other clustering variables).  
 
-For more details on the model see \citeN{raftery04}, for an overview of model-based clustering see \citeN{FraleyRaftery2002} and for more details on the \Rpackage{mclust} package see \citeN{fraley02} or \url{http://www.stat.washington.edu/mclust/}.
+For more details on the model see \citeN{raftery04}, for an overview of model-based clustering see \citeN{FraleyRaftery2002} and for more details on the \Rpackage{mclust02} package see \citeN{fraley02} or \url{http://www.stat.washington.edu/mclust/}.
 
 Two different search algorithms are available for checking single variables for inclusion into/exclusion from the set of selected clustering variables. The \Rfunarg{``greedy''} search option checks at every inclusion step the inclusion of each single variable not currently selected into the current set of selected clustering variables. The variable that has highest evidence of inclusion is proposed and, if its clustering evidence is stronger than the evidence against clustering it is included. At every exclusion step  the \Rfunarg{``greedy''} search option checks the exclusion of each single variable in the currently selected set of clustering variables and proposes the variable that has lowest evidence of clustering. The proposed variable is removed if its evidence of clustering is weaker than its evidence against clustering.This is similar to the idea for stepwise regression and may suffer from the same instabilities mentioned in \citeN{miller90} inherent in that approach (although this has not been apparent in the simulations and examples tried thus far).
 
@@ -43,26 +43,14 @@ At each inclusion step, the algorithm only checks single variables not currently
 The speed/optimally tradeoff can be changed by increasing or decreasing the different levels, e.g. by setting \Rfunarg{upper} to 10 instead of 0 we require a variable to have stronger evidence of clustering before it is included and by setting \Rfunarg{lower} to 0 we remove variables that at any stage have evidence of clustering weaker by any amount than evidence against clustering.
 
 \section{Main \Rfunction{clustvarsel} function}
-We begin by loading the package (the required \Rpackage{mclust} package will automatically be loaded at the same time).
+We begin by loading the package (the required \Rpackage{mclust02} package will automatically be loaded at the same time).
 \begin{Schunk}
 \begin{Sinput}
 > library(clustvarsel)
 \end{Sinput}
-\begin{Soutput}
-Loading required package: mclust
-
-Attaching package: 'mclust'
-
-
-	The following object(s) are masked from package:stats :
-
-	 density 
-
-
-\end{Soutput}
 \end{Schunk}
 
-The basic \Rfunction{clustvarsel}  function has the default settings of using the \Rfunarg{``greedy''} search, not using a subset for the hierarchical clustering phase of cluster model fitting, allowing an equal covariances hierarchical model when variable covariances model gives no viable answers, automatically selecting the first two variables regardless of whether the evidence of univariate/bivariate clustering is greater than not clustering (to provide starting variables) and a maximum number of paired inclusion and exclusion steps of 100. The default options for allowing different covariance parameterizations for both univariate clustering in \Rfunarg{emModels1} and multivariate clustering in \Rfunarg{emModels2} are all possible parameterizations currently available in \Rpackage{mclust} (see the help file for \Rfunction{EMclust} for more details).
+The basic \Rfunction{clustvarsel}  function has the default settings of using the \Rfunarg{``greedy''} search, not using a subset for the hierarchical clustering phase of cluster model fitting, allowing an equal covariances hierarchical model when variable covariances model gives no viable answers, automatically selecting the first two variables regardless of whether the evidence of univariate/bivariate clustering is greater than not clustering (to provide starting variables) and a maximum number of paired inclusion and exclusion steps of 100. The default options for allowing different covariance parameterizations for both univariate clustering in \Rfunarg{emModels1} and multivariate clustering in \Rfunarg{emModels2} are all possible parameterizations currently available in \Rpackage{mclust02} (see the help file for \Rfunction{EMclust} for more details).
 
 The only inputs required are a matrix \Rfunarg{X} of continuous data with rows corresponding to observations and columns (at least 2) corresponding to variables and the maximum number of groups \Rfunarg{G} believed to be possible in the data.
 
@@ -77,7 +65,6 @@ For our example we will use the crabs data in the \Rpackage{MASS} package. We kn
 \end{Sinput}
 \begin{Soutput}
 [1] "FL" "RW" "CL" "CW" "BD"
-
 \end{Soutput}
 \begin{Sinput}
 > pairs(X)
@@ -85,7 +72,7 @@ For our example we will use the crabs data in the \Rpackage{MASS} package. We kn
 \end{Sinput}
 \end{Schunk}
 The pairs plot for X is given in Figure \ref{plot1}.
-First we look at the result from choosing the best model in terms of BIC for clustering on all variables allowing all possible parameterizations and the number of groups to range over 1 to 5 (our maximum number of possible clusters \Rfunarg{G} in the dataset). We cluster the data using \Rfunction{EMclust} from the \Rpackage{mclust} and look at the results using the \Rfunction{summary} function. We then extract the estimated classifications from the best model in terms of BIC from the summary and use \Rfunction{classError} to look at the misclassification error between the current and true classifications. We can use \Rfunction{table} to look at the cross tabulated classifications.
+First we look at the result from choosing the best model in terms of BIC for clustering on all variables allowing all possible parameterizations and the number of groups to range over 1 to 5 (our maximum number of possible clusters \Rfunarg{G} in the dataset). We cluster the data using \Rfunction{EMclust} from the \Rpackage{mclust02} and look at the results using the \Rfunction{summary} function. We then extract the estimated classifications from the best model in terms of BIC from the summary and use \Rfunction{classError} to look at the misclassification error between the current and true classifications. We can use \Rfunction{table} to look at the cross tabulated classifications.
  
 \begin{Schunk}
 \begin{Sinput}
@@ -93,31 +80,27 @@ First we look at the result from choosing the best model in terms of BIC for clu
 > summary(clust1, X)
 \end{Sinput}
 \begin{Soutput}
-
 classification table:
 
  1  2  3 
-39 87 74 
+75 77 48 
 
 uncertainty (quartiles):
           0%          25%          50%          75%         100% 
-0.000000e+00 2.762578e-10 8.994514e-04 8.702884e-02 4.899403e-01 
+0.000000e+00 1.171732e-07 1.853438e-03 2.770624e-02 4.892871e-01 
 
 best BIC values:
     EEV,3     EEV,4     EEE,3 
--2918.739 -3013.279 -2933.507 
+-2925.590 -3016.711 -2933.521 
 
 best model: ellipsoidal, equal volume and shape 
-
-
 \end{Soutput}
 \begin{Sinput}
 > cl1 <- summary(clust1, X)$class
 > classError(cl1, crabscl)
 \end{Sinput}
 \begin{Soutput}
-[1] 0.37
-
+[1] 0.375
 \end{Soutput}
 \begin{Sinput}
 > table(cl1, crabscl)
@@ -125,10 +108,9 @@ best model: ellipsoidal, equal volume and shape
 \begin{Soutput}
    crabscl
 cl1  1  2  3  4
-  1  0 13  0 26
-  2 50 37  0  0
-  3  0  0 50 24
-
+  1 25 50  0  0
+  2  0  0 27 50
+  3 25  0 23  0
 \end{Soutput}
 \end{Schunk}
 Now we run the algorithm to automatically select which variables in the dataset are truly useful for clustering using \Rfunction{clustvarsel} and look at the steps of the algorithm. We then create \Robject{S}, the matrix of the selected variables and check which variables are in it.
@@ -141,13 +123,13 @@ Now we run the algorithm to automatically select which variables in the dataset 
 \begin{Soutput}
      Variable proposed BIC of new clustering variables set BIC difference     
 [1,] "CW"              "-1408.72243051261"                 "-6.23030510251988"
-[2,] "RW"              "-1908.9580882539"                  "127.404308973237" 
-[3,] "FL"              "-2357.16345970285"                 "81.3284231776024" 
-[4,] "FL"              "-2357.16345970285"                 "81.3284231776024" 
-[5,] "BD"              "-2609.88639108811"                 "55.8837276354475" 
-[6,] "BD"              "-2609.88639108811"                 "55.8837276354475" 
-[7,] "CL"              "-2609.88639108811"                 "-107.402856024695"
-[8,] "BD"              "-2609.88639108811"                 "55.8837276354475" 
+[2,] "RW"              "-1908.96423491868"                 "127.398162308462" 
+[3,] "FL"              "-2357.17088014855"                 "81.3271493966722" 
+[4,] "FL"              "-2357.17088014855"                 "81.3271493966722" 
+[5,] "BD"              "-2609.88963370441"                 "55.8879054648505" 
+[6,] "BD"              "-2609.88963370441"                 "55.8879054648505" 
+[7,] "CL"              "-2609.88963370441"                 "-107.399613408393"
+[8,] "BD"              "-2609.88963370441"                 "55.8879054648505" 
      Type of step Decision  
 [1,] "Add"        "Accepted"
 [2,] "Add"        "Accepted"
@@ -157,7 +139,6 @@ Now we run the algorithm to automatically select which variables in the dataset 
 [6,] "Remove"     "Rejected"
 [7,] "Add"        "Rejected"
 [8,] "Remove"     "Rejected"
-
 \end{Soutput}
 \begin{Sinput}
 > S <- result$sel.var
@@ -165,7 +146,6 @@ Now we run the algorithm to automatically select which variables in the dataset 
 \end{Sinput}
 \begin{Soutput}
 [1] "CW" "RW" "FL" "BD"
-
 \end{Soutput}
 \end{Schunk}
 Next we look at the results from clustering (using \Rfunction{EMclust}) on S using the \Rfunction{summary} command. Again we extract the classifications from this model, \Robject{cl2} and use \Rfunction{classError} and \Rfunction{table} to look at the misclassifications comparing it to the true classifications  and the classifications from the model with all variables, \Robject{cl1}.
@@ -176,23 +156,20 @@ Next we look at the results from clustering (using \Rfunction{EMclust}) on S usi
 > summary(clust2, S)
 \end{Sinput}
 \begin{Soutput}
-
 classification table:
 
  1  2  3  4 
-60 55 40 45 
+60 40 45 55 
 
 uncertainty (quartiles):
           0%          25%          50%          75%         100% 
-0.000000e+00 2.010656e-08 4.692131e-05 1.163673e-02 4.914785e-01 
+0.000000e+00 1.878522e-08 4.637432e-05 1.225672e-02 4.964781e-01 
 
 best BIC values:
-    EEV,4     EEV,3     EEE,5 
--2609.886 -2696.832 -2661.066 
+    EEV,4     EEV,5     VVV,4 
+-2609.890 -2760.546 -2731.526 
 
 best model: ellipsoidal, equal volume and shape 
-
-
 \end{Soutput}
 \begin{Sinput}
 > cl2 <- summary(clust2, S)$class
@@ -200,7 +177,6 @@ best model: ellipsoidal, equal volume and shape
 \end{Sinput}
 \begin{Soutput}
 [1] 0.075
-
 \end{Soutput}
 \begin{Sinput}
 > table(cl2, crabscl)
@@ -209,10 +185,9 @@ best model: ellipsoidal, equal volume and shape
    crabscl
 cl2  1  2  3  4
   1 10 50  0  0
-  2  0  0 50  5
-  3 40  0  0  0
-  4  0  0  0 45
-
+  2 40  0  0  0
+  3  0  0  0 45
+  4  0  0 50  5
 \end{Soutput}
 \begin{Sinput}
 > table(cl1, cl2)
@@ -220,10 +195,9 @@ cl2  1  2  3  4
 \begin{Soutput}
    cl2
 cl1  1  2  3  4
-  1 13  0  0 26
-  2 47  0 40  0
-  3  0 55  0 19
-
+  1 60 15  0  0
+  2  0  0 45 32
+  3  0 25  0 23
 \end{Soutput}
 \end{Schunk}
 \section{Adjustments for Speeding Up Algorithm}
@@ -250,29 +224,25 @@ We set up the 4 dimensional data matrix X with clustering information only in th
 > system.time(result1 <- clustvarsel(X, G = 3, samp = T, sampsize = 200))
 \end{Sinput}
 \begin{Soutput}
-[1] 5.96 0.17 6.99 0.00 0.00
-
+[1]  6.154  0.177 16.074  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > system.time(result2 <- clustvarsel(X, G = 3))
 \end{Sinput}
 \begin{Soutput}
-[1] 7.30 0.20 9.13 0.00 0.00
-
+[1]  7.144  0.212 22.668  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > colnames(result1$sel.var)
 \end{Sinput}
 \begin{Soutput}
 [1] "2" "1"
-
 \end{Soutput}
 \begin{Sinput}
 > colnames(result2$sel.var)
 \end{Sinput}
 \begin{Soutput}
 [1] "2" "1"
-
 \end{Soutput}
 \end{Schunk}
 If we have a large number of variables in our dataset we may find that using the \Rfunarg{``headlong''}  search algorithm option may be faster than the default \Rfunarg{``greedy''} search. We construct a medium sized dataset below for which we compare the time between using the headlong method (search=\Rfunarg{``headlong''}) and using the greedy method.
@@ -301,44 +271,38 @@ We set up the 8 dimensional data matrix X with clustering information only in th
 > system.time(result1 <- clustvarsel(X, G = 3, search = "headlong"))
 \end{Sinput}
 \begin{Soutput}
-[1] 4.82 0.11 5.37 0.00 0.00
-
+[1]  3.999  0.121 11.818  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > system.time(result2 <- clustvarsel(X, G = 3))
 \end{Sinput}
 \begin{Soutput}
-[1]  8.10  0.21 11.56  0.00  0.00
-
+[1]  7.439  0.185 17.731  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > colnames(result1$sel.var)
 \end{Sinput}
 \begin{Soutput}
-[1] "8" "7"
-
+[1] "7" "8"
 \end{Soutput}
 \begin{Sinput}
 > colnames(result2$sel.var)
 \end{Sinput}
 \begin{Soutput}
-[1] "8" "7"
-
+[1] "7" "8"
 \end{Soutput}
 \begin{Sinput}
 > system.time(result3 <- clustvarsel(X, G = 3, emModels2 = c("EEE", 
 +     "VVV"), search = "headlong"))
 \end{Sinput}
 \begin{Soutput}
-[1] 2.65 0.08 3.34 0.00 0.00
-
+[1] 2.540 0.078 7.031 0.000 0.000
 \end{Soutput}
 \begin{Sinput}
 > colnames(result3$sel.var)
 \end{Sinput}
 \begin{Soutput}
-[1] "8" "7"
-
+[1] "7" "8"
 \end{Soutput}
 \end{Schunk}
 If we have both a large number of observations and variables we can use both the \Rfunarg{samp} and \Rfunarg{``headlong''} options. Again we generate an 8 dimensional data matrix X in a similar way to the previous example, this time with 400 observations. We then use \Rfunction{system.time} to compare the time taken for variable selection with the models checked restricted to equal and unconstrained covariances (\Rfunarg{emModels2}=c("EEE","VVV")), ``\Rfunarg{headlong}'' search and sampling 200 observations for the hierarchical clustering stage (\Rfunarg{samp}=T and \Rfunarg{sampsize}=200) versus variable selection just with \Rfunarg{headlong} search and variable selection with \Rfunarg{greedy} search. 
@@ -365,43 +329,37 @@ If we have both a large number of observations and variables we can use both the
 +     "VVV"), search = "headlong", samp = T, sampsize = 200))
 \end{Sinput}
 \begin{Soutput}
-[1] 5.30 0.19 7.32 0.00 0.00
-
+[1]  5.420  0.190 16.108  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > system.time(result2 <- clustvarsel(X, G = 3, search = "headlong"))
 \end{Sinput}
 \begin{Soutput}
-[1] 10.63  0.31 14.18  0.00  0.00
-
+[1] 10.567  0.330 25.471  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > system.time(result3 <- clustvarsel(X, G = 3))
 \end{Sinput}
 \begin{Soutput}
-[1] 17.81  0.47 25.33  0.00  0.00
-
+[1] 17.827  0.480 48.359  0.000  0.000
 \end{Soutput}
 \begin{Sinput}
 > colnames(result1$sel.var)
 \end{Sinput}
 \begin{Soutput}
 [1] "8" "7"
-
 \end{Soutput}
 \begin{Sinput}
 > colnames(result2$sel.var)
 \end{Sinput}
 \begin{Soutput}
 [1] "8" "7"
-
 \end{Soutput}
 \begin{Sinput}
 > colnames(result3$sel.var)
 \end{Sinput}
 \begin{Soutput}
 [1] "8" "7"
-
 \end{Soutput}
 \end{Schunk}
 \bibliography{refs}
