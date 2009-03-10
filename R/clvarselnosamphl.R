@@ -18,7 +18,7 @@ if((allow.EEE)&sum(is.finite(xBIC))==0) xBIC<-EMclust(X[,i],2:G,emModels1,hcPair
 #maxBIC is the maximum BIC over all clustering models (2 to G groups) fit
 if(sum(is.finite(xBIC))==0) maxBIC[i]<-NA else maxBIC[i]<-max(xBIC[is.finite(xBIC)])
 #Fit and get BIC for a single component no-cluster normal model
-oneBIC[i]<-EMclust(X[,i],1,"V")
+oneBIC[i]<-EMclust(X[,i],c(1:1),"V")
 #Difference between maximum BIC for clustering and BIC for no clustering
 maxdiff[i]<-c(maxBIC[i]-oneBIC[i])
 }
@@ -151,7 +151,7 @@ if((allow.EEE)&sum(is.finite(xBIC))==0) xBIC<-EMclust(X[,i],2:G,emModels1,hcPair
 if(sum(is.finite(xBIC))==0) depBIC<-NA else depBIC<-max(xBIC[is.finite(xBIC)])
 DepBIC<-c(DepBIC,depBIC)
 #Fit and get BIC for a single component no-cluster normal model
-oneBIC<-EMclust(X[,i],1,"V")
+	oneBIC<-EMclust(X[,i],c(1:1),"V")
 #Difference between maximum BIC for clustering and BIC for no clustering
 cdiff<-c(depBIC-oneBIC)
 if(!is.finite(cdiff)) cdiff<-0
@@ -276,7 +276,7 @@ NS<-NULL
 if(ncol(S)==1){
 cdiff<-0
 oneBIC<-0
-oneBIC<-EMclust(S,1,"V")
+oneBIC<-EMclust(S,c(1:1),"V")
 #Difference between maximum BIC for clustering and BIC for no clustering
 cdiff<-c(BICS-oneBIC)
 if(is.na(cdiff)) cdiff<-0

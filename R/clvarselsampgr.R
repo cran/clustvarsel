@@ -20,7 +20,7 @@ if((allow.EEE)&sum(is.finite(xBIC))==0) xBIC<-EMclust(X[,i],2:G,emModels1,hcPair
 #maxBIC is the maximum BIC over all clustering models (2 to G groups) fit
 if(sum(is.finite(xBIC))==0) maxBIC[i]<-NA else maxBIC[i]<-max(xBIC[is.finite(xBIC)])
 #Fit and get BIC for a single component no-cluster normal model
-oneBIC[i]<-EMclust(X[,i],1,"V")
+oneBIC[i]<-EMclust(X[,i],c(1:1),"V")
 #Difference between maximum BIC for clustering and BIC for no clustering
 maxdiff[i]<-c(maxBIC[i]-oneBIC[i])
 }
@@ -141,7 +141,7 @@ for(i in 1:ncol(NS))
 cdiff<-depBIC-cindepBIC
 #Choose the variable with the largest difference
 m<-max(cdiff[is.finite(cdiff)])
-arg<-which(cdiff==m,arr.ind)[1]
+arg<-which(cdiff==m,arr.ind=TRUE)[1]
 
 if(cdiff[arg]>0){ 
 #if this difference is positive add this variable to S and update the clustering model's BICS
@@ -167,7 +167,7 @@ mat<-rbind(mat,c(colnames(NS)[arg],BICS,cdiff[arg],"Add","Rejected"))
 if(ncol(S)==1){
 cdiff<-0
 oneBIC<-0
-oneBIC<-EMclust(S,1,"V")
+	oneBIC<-EMclust(S,c(1:1),"V")
 #Difference between maximum BIC for clustering and BIC for no clustering
 cdiff<-c(BICS-oneBIC)
 if(is.na(cdiff)) cdiff<-0 else cdiff<-cdiff
