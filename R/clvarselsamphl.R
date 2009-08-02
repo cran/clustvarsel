@@ -10,17 +10,21 @@ sub<-sample(1:n,sampsize,replace=FALSE)
 #First Step - selecting single variable and ordering
 maxBIC<-rep(0,d)
 maxdiff<-rep(0,d)
-oneBIC<-rep(0,d)
+oneBIC<-rep(NA,d)
 for(i in 1:d)
 {
+xBIC<-NULL
 #Fit the cluster models from 2 to G groups
-xBIC<-EMclust(X[,i],2:G,emModels1)
+try(xBIC<-Mclust(X[,i],2:G,emModels1,initialization=list(subset=sub)),TRUE)
+if(is.null(xBIC)) try(xBIC<-Mclust(X[,i],2:G,emModels1),TRUE)
 #If we get all NA's from "V" starting hierarchical values use "E"
-if((allow.EEE)&sum(is.finite(xBIC))==0) xBIC<-EMclust(X[,i],2:G,emModels1,hcPairs = hcE(X[,i])) 
+if((allow.EEE)&sum(is.finite(xBIC$BIC))==0) try(xBIC<-Mclust(X[,i],2:G,emModels1,initialization=list(hcPairs = hcE(X[sub,i]),subset=sub)),TRUE) 
+if((allow.EEE)&sum(is.finite(xBIC$BIC))==0) try(xBIC<-Mclust(X[,i],2:G,emModels1,initialization=list(hcPairs = hcE(X[,i]))),TRUE) 
 #maxBIC is the maximum BIC over all clustering models (2 to G groups) fit
-if(sum(is.finite(xBIC))==0) maxBIC[i]<-NA else maxBIC[i]<-max(xBIC[is.finite(xBIC)])
+if(sum(is.finite(xBIC$BIC))==0) maxBIC[i]<-NA else maxBIC[i]<-max(xBIC$BIC[is.finite(xBIC$BIC)])
 #Fit and get BIC for a single component no-cluster normal model
-oneBIC[i]<-EMclust(X[,i],c(1:1),"V")
+try(oneBIC[i]<-Mclust(X[,i],1,"V",initialization=list(subset=sub))$BIC[1],TRUE)
+if(is.na(oneBIC[i])) try(oneBIC[i]<-Mclust(X[,i],1,"V")$BIC[1],TRUE)
 #Difference between maximum BIC for clustering and BIC for no clustering
 maxdiff[i]<-c(maxBIC[i]-oneBIC[i])
 }
@@ -55,22 +59,25 @@ i<-0
 while(crit<=upper&i<ncol(NS))
 {
  i<-i+1
+ sBIC<-NULL
 #Fit the regression of the proposed variable on the variable in S
  fm<-lm(NS[,i]~S)
  sigma<-(sum((summary(fm)$resid)^2)/n)^0.5
 #Calculate the BIC for the regression
  regBIC<--n*log(2*pi)-2*n*log(sigma)-n-log(n)*3
 #Fit the cluster model on the two variables for 2 to G groups 
- sBIC<-EMclust(cbind(S,NS[,i]),2:G,emModels2,subset=sub)
+ try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2,initialization=list(subset=sub)),TRUE)
+ if(is.null(sBIC)) try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2),TRUE)
 #If we get all NA's from "VVV" starting hierarchical values use "EEE"
- if((allow.EEE)&sum(is.finite(sBIC))==0) sBIC<-EMclust(cbind(S,NS[,i]),2:G,emModels2,hcPairs = hcEEE(cbind(S,NS[,i])[sub,]),subset=sub)
+ if((allow.EEE)&sum(is.finite(sBIC$BIC))==0) try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2,initialization=list(hcPairs = hcEEE(cbind(S,NS[,i])[sub,]),subset=sub)),TRUE)
+ if((allow.EEE)&sum(is.finite(sBIC$BIC))==0) try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2,initialization=list(hcPairs = hcEEE(cbind(S,NS[,i])))),TRUE)
 #depBIC is the BIC for the clustering model with both variables
- if(sum(is.finite(sBIC))==0) depBIC<-NA else depBIC<-max(sBIC[is.finite(sBIC)])
+ if(sum(is.finite(sBIC$BIC))==0) depBIC<-NA else depBIC<-max(sBIC$BIC[is.finite(sBIC$BIC)])
  DepBIC<-c(DepBIC,depBIC)
  cindepBIC<-regBIC+BICS
 #cindepBIC is the BIC for the clustering model on S and the regression model of the new variable on S
  cdiff<-depBIC-cindepBIC
- if(!is.finite(cdiff)) cdiff<-0
+ if(!is.finite(cdiff)) cdiff<-upper
  Cdiff<-c(Cdiff,cdiff)
  crit<-cdiff 
 }
@@ -139,24 +146,29 @@ DepBIC<-NULL
 crit<--10
 cdiff<-0
 Cdiff<-NULL
-oneBIC<-rep(0,d)
+#oneBIC<-rep(NA,d)
 i<-0
 crit<--10
 while(crit<=upper&i<ncol(NS))
 {
+xBIC<-NULL
+oneBIC<-NULL
 i<-i+1
 #Fit the cluster models from 2 to G groups
-xBIC<-EMclust(X[,i],2:G,emModels1)
+try(xBIC<-Mclust(X[,i],2:G,emModels1,initialization=list(subset=sub)),TRUE)
+if(is.null(xBIC)) try(xBIC<-Mclust(X[,i],2:G,emModels1),TRUE)
 #If we get all NA's from "V" starting hierarchical values use "E"
-if((allow.EEE)&sum(is.finite(xBIC))==0) xBIC<-EMclust(X[,i],2:G,emModels1,hcPairs = hcE(X[,i]))
+if((allow.EEE)&sum(is.finite(xBIC$BIC))==0) try(xBIC<-Mclust(X[,i],2:G,emModels1,initialization=list(hcPairs = hcE(X[sub,i]),subset=sub)),TRUE)
+if((allow.EEE)&sum(is.finite(xBIC$BIC))==0) try(xBIC<-Mclust(X[,i],2:G,emModels1,initialization=list(hcPairs = hcE(X[,i]))),TRUE)
 #depBIC is the maximum BIC over all clustering models (2 to G groups) fit
-if(sum(is.finite(xBIC))==0) depBIC<-NA else depBIC<-max(xBIC[is.finite(xBIC)])
+if(sum(is.finite(xBIC$BIC))==0) depBIC<-NA else depBIC<-max(xBIC$BIC[is.finite(xBIC$BIC)])
 DepBIC<-c(DepBIC,depBIC)
 #Fit and get BIC for a single component no-cluster normal model
-	oneBIC<-EMclust(X[,i],c(1:1),"V")
+try(oneBIC<-Mclust(X[,i],1,"V",initialization=list(subset=sub))$BIC[1],TRUE)
+if(is.null(oneBIC)) try(oneBIC<-Mclust(X[,i],1,"V")$BIC[1],TRUE)
 #Difference between maximum BIC for clustering and BIC for no clustering
 cdiff<-c(depBIC-oneBIC)
-if(!is.finite(cdiff)) cdiff<-0
+if(!is.finite(cdiff)) cdiff<-upper
 Cdiff<-c(Cdiff,cdiff)
 crit<-cdiff
 }
@@ -214,6 +226,7 @@ p<-ncol(S)+2
 #We only run until we find a variable whose difference in BIC between being included in the clustering variables versus conditionally independent of the clustering is greater than upper
 while(crit<=upper&i<ncol(NS))
 {
+ sBIC<-NULL
  i<-i+1
 #Fit the regression of the proposed variable on the variable(s) in S
  fm<-lm(NS[,i]~S)
@@ -221,16 +234,18 @@ while(crit<=upper&i<ncol(NS))
 #Calculate the BIC for the regression
  regBIC<--n*log(2*pi)-2*n*log(sigma)-n-log(n)*p
 #Fit the cluster model on the S variables with the proposed variable for 2 to G groups 
- sBIC<-EMclust(cbind(S,NS[,i]),2:G,emModels2,subset=sub)
+ try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2,initialization=list(subset=sub)),TRUE)
+ if(is.null(sBIC)) try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2),TRUE)
 #If we get all NA's from "VVV" starting hierarchical values use "EEE"
- if((allow.EEE)&(sum(is.finite(sBIC))==0)) sBIC<-EMclust(cbind(S,NS[,i]),2:G,emModels2,hcPairs = hcEEE(cbind(S,NS[,i])[sub,]),subset=sub) 
+ if((allow.EEE)&(sum(is.finite(sBIC$BIC))==0)) try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2,initialization=list(hcPairs = hcEEE(cbind(S,NS[,i])[sub,]),subset=sub)),TRUE) 
+ if((allow.EEE)&(sum(is.finite(sBIC$BIC))==0)) try(sBIC<-Mclust(cbind(S,NS[,i]),2:G,emModels2,initialization=list(hcPairs = hcEEE(cbind(S,NS[,i])))),TRUE) 
 #depBIC is the BIC for the clustering model with both S and proposed variable
- if(sum(is.finite(sBIC))==0) depBIC<-NA else depBIC<-max(sBIC[is.finite(sBIC)])
+ if(sum(is.finite(sBIC$BIC))==0) depBIC<-NA else depBIC<-max(sBIC$BIC[is.finite(sBIC$BIC)])
  DepBIC<-c(DepBIC,depBIC)
 #cindepBIC is the BIC for the clustering model on S and the regression model of the new variable on S
  cindepBIC<-regBIC+BICS
  cdiff<-depBIC-cindepBIC
- if(!is.finite(cdiff)) cdiff<-0
+ if(!is.finite(cdiff)) cdiff<-upper
  Cdiff<-c(Cdiff,cdiff)
  crit<-cdiff
 }
@@ -277,11 +292,12 @@ NS<-NULL
 
 if(ncol(S)==1){
 cdiff<-0
-oneBIC<-0
-oneBIC<-EMclust(S,c(1:1),"V")
+oneBIC<-NA
+try(oneBIC<-Mclust(S,1,"V",initialization=list(subset=sub))$BIC[1],TRUE)
+if(is.na(oneBIC)) try(oneBIC<-Mclust(S,1,"V")$BIC[1],TRUE)
 #Difference between maximum BIC for clustering and BIC for no clustering
 cdiff<-c(BICS-oneBIC)
-if(is.na(cdiff)) cdiff<-0
+if(is.na(cdiff)) cdiff<-upper
 #check if difference is negative
 if(cdiff<=upper)
 {
@@ -320,16 +336,19 @@ p<-ncol(S)+1
 while(crit>upper&i<ncol(S))
 {
  i<-i+1
+ sBIC<-NULL
 #Fit the regression of the proposed variable from S on the other variable(s) in S
  fm<-lm(S[,i]~S[,-i])
  sigma<-(sum((summary(fm)$resid)^2)/n)^0.5
 #Calculate the BIC for the regression
  regBIC<--n*log(2*pi)-2*n*log(sigma)-n-log(n)*p
 #Fit the cluster model on the S variables without the proposed variable for 2 to G groups 
- if(ncol(S)>=3) sBIC<-EMclust(S[,-i],2:G,name,subset=sub) else sBIC<-EMclust(S[,-i],2:G,name)
+ try(sBIC<-Mclust(as.matrix(S[,-i]),2:G,name,initialization=list(subset=sub)),TRUE)
+ if(is.null(sBIC)) try(sBIC<-Mclust(as.matrix(S[,-i]),2:G,name),TRUE)
 #If we get all NA's from "VVV" starting hierarchical values use "EEE"
- if((allow.EEE)&ncol(S)>=3&sum(is.finite(sBIC))==0){sBIC<-EMclust(S[,-i],2:G,name,hcPairs = hcEEE(S[sub,-i]),subset=sub)} else{if((allow.EEE)&ncol(S)==2&sum(is.finite(sBIC))==0){sBIC<-EMclust(S[,-i],2:G,name,hcPairs = hcE(S[,-i]))}} 
- if(sum(is.finite(sBIC))==0) rdep<-NA else rdep<-max(sBIC[is.finite(sBIC)])
+ if((allow.EEE)&ncol(S)>=3&sum(is.finite(sBIC$BIC))==0){try(sBIC<-Mclust(S[,-i],2:G,name,initialization=list(hcPairs = hcEEE(S[sub,-i]),subset=sub)),TRUE)} else{if((allow.EEE)&ncol(S)==2&sum(is.finite(sBIC$BIC))==0){try(sBIC<-Mclust(as.matrix(S[,-i]),2:G,name,initialization=list(hcPairs = hcE(S[sub,-i]),subset=sub)),TRUE)}} 
+ if((allow.EEE)&ncol(S)>=3&sum(is.finite(sBIC$BIC))==0){try(sBIC<-Mclust(S[,-i],2:G,name,initialization=list(hcPairs = hcEEE(S[,-i]))),TRUE)} else{if((allow.EEE)&ncol(S)==2&sum(is.finite(sBIC$BIC))==0){try(sBIC<-Mclust(as.matrix(S[,-i]),2:G,name,initialization=list(hcPairs = hcE(S[,-i]))),TRUE)}} 
+ if(sum(is.finite(sBIC$BIC))==0) rdep<-NA else rdep<-max(sBIC$BIC[is.finite(sBIC$BIC)])
 #cindepBIC is the BIC for the clustering model on the other variables in S and the regression model of the proposed variable on the other variables in S
 cindepBIC<-regBIC+rdep
 cdiff<-depBIC-cindepBIC
@@ -370,9 +389,9 @@ check2<-colnames(S)
 #if they have changed (either added one or removed one or changed one) then continue the algorithm (criterion is 1) otherwise stop (criterion is 0)
 if(length(check2)!=length(check1)) criterion<-1 else{ if(sum(check1==check2)!=length(check1)) criterion<-1 else {criterion<-0}}
 }
-if(iter==itermax) print("Warning: Algorithm stopped because maximum number of iterations was reached")
 #List the selected variables and the matrix of steps' information
 colnames(mat)<-c("Variable proposed","BIC of new clustering variables set","BIC difference","Type of step","Decision")
-list(sel.var=S,steps.info=mat)
+if(iter==itermax) print("Warning: Algorithm stopped because maximum number of iterations was reached")
+return(list(sel.var=S,steps.info=mat))
 }
 

@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Greedy Search Variable Selection for Model-Based Clustering with hierarchical clustering sub-sampling}
 \description{A function which uses a greedy search, with sub-sampling at
-  the hierarchical clustering stage of EMclust, to find the (locally)
+  the hierarchical clustering stage of Mclust, to find the (locally)
   optimal subset of variables in a dataset that have group/cluster
   information. This function is called by the clustvarsel function when the option `samp' is set to TRUE and `search' is set to ``greedy''.}
 \usage{
@@ -68,7 +68,7 @@ speed of the algorithm. The headlong search may be quicker than the
 greedy search in larger data sets (depending on the values of the upper
 and lower bounds chosen for the BIC difference).
 
-The defaults for the `eps', `tol' and `itmax' options for the EMclust
+The defaults for the `eps', `tol' and `itmax' options for the Mclust
 steps run in the algorithm can be changed by setting the variables
 .Mclust\$eps, .Mclust\$tol and .Mclust\$itmax respectively to new values.
 
@@ -91,7 +91,7 @@ steps run in the algorithm can be changed by setting the variables
 \url{http://www.stat.washington.edu/www/research/reports/2004/tr452.pdf}
 }
 \author{N. Dean and A. E. Raftery}
-\seealso{\code{\link{clustvarsel}}, \code{\link{clvarselnosampgr}}, \code{\link{clvarselsamphl}}, \code{\link{clvarselnosamphl}}, \code{\link[mclust02]{EMclust}} }
+\seealso{\code{\link{clustvarsel}}, \code{\link{clvarselnosampgr}}, \code{\link{clvarselsamphl}}, \code{\link{clvarselnosamphl}}, \code{\link[mclust]{Mclust}} }
 \examples{
 #Create 3-d data with 2 clusters in the first two variables and no
 #clustering in the rest
@@ -119,7 +119,7 @@ m<-clvarselsampgr(X,G=3,sampsize=100)
 colnames(m$sel.var)
 m$steps.info
 #look at the clustering produced by the variables selected
-result<-EMclust(m$sel.var,1:3)
-summary(result,m$sel.var)
+result<-Mclust(m$sel.var,1:3)
+result
 }
 \keyword{cluster}
