@@ -1,0 +1,19 @@
+citHeader("To cite clustvarsel in publications use:")
+
+citEntry(entry = "Article",
+  title        = "{clustvarsel}: A Package Implementing Variable Selection for Model-based Clustering in {R}",
+  author       = personList(as.person("Luca Scrucca"), as.person("Adrian E. Raftery"), as.person("Nema Dean")),
+  journal      = "(to be submitted) Journal of Statistical Software",
+  year         = "2013",
+  volume       = "??",
+  number       = "?",
+  pages        = "??--??",
+  url          = "http://www.jstatsoft.org/??/??/",
+
+  textVersion  =
+  paste("Luca Scrucca, Adrian E. Raftery, Nema Dean, (2013).",
+        "clustvarsel: A Package Implementing Variable Selection for Model-based Clustering in R",
+        "(to be submitted) Journal of Statistical Software, ??(?), ??-??.",
+        "URL http://www.jstatsoft.org/??/??/.")
+)
+

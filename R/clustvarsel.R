@@ -1,15 +1,68 @@
-"clustvarsel" <-
-function(X,G,emModels1=c("E","V"),emModels2=c("EII","VII","EEI","VEI","EVI","VVI","EEE","EEV","VEV","VVV"),samp=FALSE,sampsize=2000,allow.EEE=TRUE,forcetwo=TRUE,search="greedy",upper=0,lower=-10,itermax=100)
+clustvarsel <- function(data, G = 1:9, 
+                        search = c("greedy", "headlong"),
+                        direction = c("forward", "backward"),
+                        emModels1 = c("E", "V"), 
+                        emModels2 = mclust.options("emModelNames"),
+                        samp = FALSE, sampsize = 2000, 
+                        hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE,
+                        BIC.diff = 0, BIC.upper = 0, BIC.lower = -10, 
+                        itermax = 100, parallel = FALSE)
 {
-require(mclust)
-#Check whether there are variable names to identify selected variables
-ifelse(is.null(colnames(X)),colnames(X)<-1:ncol(X),colnames(X)<-colnames(X))
-#Apply varselection function depending on whether subsampling is required, samp=T or greedy or headlong search is required
-if((samp)&search=="greedy") m<-clvarselsampgr(X,G,emModels1=emModels1, emModels2=emModels2,sampsize=sampsize,allow.EEE=allow.EEE,forcetwo=forcetwo,itermax=itermax)
-if((!samp)&search=="greedy") m<-clvarselnosampgr(X,G,emModels1=emModels1,emModels2=emModels2,allow.EEE=allow.EEE,forcetwo=forcetwo,itermax=itermax)
-if((samp)&search=="headlong") m<-clvarselsamphl(X,G,emModels1=emModels1,emModels2=emModels2,sampsize=sampsize,allow.EEE=allow.EEE,forcetwo=forcetwo,upper=upper,lower=lower,itermax=itermax)
-if((!samp)&search=="headlong") m<-clvarselnosamphl(X,G,emModels1=emModels1,emModels2=emModels2,allow.EEE=allow.EEE,forcetwo=forcetwo,upper=upper,lower=lower,itermax=itermax)
 
-return(m)
+  call <- match.call()
+  mc <- match.call(expand.dots = TRUE)
+  
+  # supress warning temporarily
+  warn <- getOption("warn")
+  on.exit(options("warn" = warn))
+  options("warn" = -1)
+
+  X <- data.matrix(data)
+  # Check whether there are variable names to identify selected variables
+  if(is.null(colnames(X))) 
+    colnames(X) <- paste("X", 1:ncol(X), sep = "")
+  search <- match.arg(search)
+  mc$data <- NULL
+  
+  if(search == "greedy" & direction == "forward")
+    { mc[[1]] <- as.name("clvarselgrfwd")
+      mc$X <- X
+      mc$search <- mc$direction <- mc$BIC.upper <- mc$BIC.lower <- NULL
+      out <- eval(mc, parent.frame())
+    }
+  else if(search == "greedy" & direction == "backward")
+    { mc[[1]] <- as.name("clvarselgrbkw")
+      mc$X <- X
+      mc$search <- mc$direction <- mc$forcetwo <- mc$BIC.upper <- mc$BIC.lower <- NULL
+      out <- eval(mc, parent.frame())
+    }
+  else if(search == "headlong" & direction == "forward")
+    { mc[[1]] <- as.name("clvarselhlfwd")
+      mc$X <- X
+      mc$search <- mc$direction <- mc$BIC.diff <- mc$parallel <- NULL
+      out <- eval(mc, parent.frame())
+    }   
+  else if(search == "headlong" & direction == "backward")
+    { mc[[1]] <- as.name("clvarselhlbkw")
+      mc$X <- X
+      mc$search <- mc$direction <- mc$forcetwo <- mc$BIC.diff <- mc$parallel <- NULL
+      out <- eval(mc, parent.frame())
+    }
+  else stop("selected search and/or direction not available")
+  
+  class(out) <- "clustvarsel"  
+  return(out)
 }
 
+print.clustvarsel <- function(x, digits = getOption("digits"), ...) 
+{
+  cat("'", class(x)[1], "' model object:\n\n", sep = "")
+  switch(x$search,
+         "greedy"   = cat("Stepwise (", x$direction, ") greedy search:\n", sep=""),
+         "headlong" = cat("Headlong (", x$direction, ") search:\n", sep="")
+         )
+  print(x$steps.info, na.print = "", print.gap = 2, digits = digits, ...)
+  # cat("\nSelected subset:", paste(colnames(x$sel.var)))
+  cat("\nSelected subset:", paste(names(x$subset), collapse = ", "), "\n")
+  invisible()
+}
