@@ -8,7 +8,7 @@ clvarselgrfwd <- function(X, G = 1:9,
                           samp = FALSE, sampsize = 2000, 
                           hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
                           BIC.diff = 0, itermax = 100, 
-                          parallel = FALSE)
+                          parallel = FALSE, verbose = FALSE)
 {
   X <- as.matrix(X)
   n <- nrow(X) # number of rows = number of observations
@@ -25,12 +25,15 @@ clvarselgrfwd <- function(X, G = 1:9,
   parallel <- if(is.logical(parallel)) 
                 { if(parallel) startParallel(parallel) else FALSE }
               else { startParallel(parallel) }
+  on.exit(if(parallel)
+          parallel::stopCluster(attr(parallel, "cluster")))
   # define operator to use depending on parallel being TRUE or FALSE
   `%DO%` <- if(parallel) `%dopar%` else `%do%`
   i <- NULL # dummy to trick R CMD check 
 
   # First Step - selecting single variable
   hcModel1 <- if(any(grep("V", hcModel))) "V" else "E"
+  if(verbose) print(paste("iter", 1))
   out <- foreach(i = 1:d) %DO% 
   {
     xBIC <- NULL
@@ -75,7 +78,8 @@ clvarselgrfwd <- function(X, G = 1:9,
   info <- data.frame(Var = colnames(S), BIC = BICS, BICdif = maxdiff[arg], 
                      Step = "Add", Decision = "Accepted",
                      stringsAsFactors = FALSE)
-
+  if(verbose) print(info)
+  if(verbose) print(paste("iter", 2))
   # Second Step - selecting second variable
   out <- foreach(i = 1:ncol(NS)) %DO%
   {
@@ -86,13 +90,13 @@ clvarselgrfwd <- function(X, G = 1:9,
     sBIC <- NULL
     try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, 
                        modelNames = emModels2,
-                       initialization = list(hcPairs = hc(hcModel, cbind(S,NS[,i])[sub,]), subset = sub)),
+                       initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub)),
         silent = TRUE)
     # If we get all NA's from "VVV" starting hierarchical values use "EEE"
     if((allow.EEE) & sum(is.finite(sBIC$BIC))==0)
        try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, 
                           modelNames = emModels2,
-                          initialization = list(hcPairs = hcEEE(cbind(S,NS[,i])[sub,]), subset = sub)),
+                          initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]), subset = sub)),
            silent = TRUE)
     # depBIC is the BIC for the clustering model with both variables
     depBIC <- if(sum(is.finite(sBIC$BIC))==0) NA 
@@ -128,6 +132,8 @@ clvarselgrfwd <- function(X, G = 1:9,
   else
     { info <- rbind(info, c(colnames(NS)[arg],BICS,cdiff[arg],"Add","Rejected")) }
 
+  if(verbose) print(info)
+
   criterion <- 1
   iter <- 0
   while((criterion == 1) & (iter < itermax))
@@ -135,7 +141,10 @@ clvarselgrfwd <- function(X, G = 1:9,
     iter <- iter+1
     check1 <- colnames(S)
     
-    # Addition step
+    if(verbose) print(paste("iter", iter+2))
+    
+    # Adding step
+    if(verbose) print("adding step")
     # For the special case where we have removed all the clustering 
     # variables/S is empty
     if(ncol(S)==0 || is.null(ncol(S)))
@@ -178,12 +187,12 @@ clvarselgrfwd <- function(X, G = 1:9,
               sBIC <- NULL                 
               try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, 
                                  modelNames = emModels2,
-                                 initialization = list(hcPairs = hc(hcModel, cbind(S,NS[,i])[sub,]), subset = sub)),
+                                 initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub)),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
               if((allow.EEE) & (sum(is.finite(sBIC$BIC))==0))
                  try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                                    initialization = list(hcPairs = hcEEE(cbind(S,NS[,i])[sub,]),
+                                    initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]),
                                                           subset = sub)),
                      silent = TRUE)
               # depBIC is the BIC for the clustering model with both S
@@ -229,12 +238,13 @@ clvarselgrfwd <- function(X, G = 1:9,
       }
     # Removal Step for the special case where S contains only 
     # a single variable
+    if(verbose) print("removing step")
     if(ncol(S) == 1)
       { 
         cdiff <- 0
         oneBIC <- NA
         try(oneBIC <- Mclust(as.matrix(S), G = 1, modelNames = emModels1,
-                             initialization = list(hcPairs = hc(hcModel1, S[sub,]), 
+                             initialization = list(hcPairs = hc(hcModel1, data = S[sub,]), 
                                                    subset = sub))$BIC[1],
             silent = TRUE)
         # Difference between maximum BIC for clustering and BIC 
@@ -277,14 +287,14 @@ clvarselgrfwd <- function(X, G = 1:9,
               sBIC <- NULL
               try(sBIC <- Mclust(as.matrix(S[,-i]), G = G, 
                                  modelNames = name,
-                                 initialization = list(hcPairs = hc(hcname, cbind(S,NS[,i])[sub,]), 
+                                 initialization = list(hcPairs = hc(hcname, data = cbind(S,NS[,i])[sub,]), 
                                                         subset = sub)),
                    silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values 
               # use "EEE"
               if((allow.EEE) & ncol(S)>=3 & sum(is.finite(sBIC$BIC))==0)
                 { try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
-                                     initialization = list(hcPairs = hcEEE(S[sub,-i]),
+                                     initialization = list(hcPairs = hc("EEE", data = S[sub,-i]),
                                                            subset = sub)),
                       silent = TRUE) }
                else
@@ -337,6 +347,7 @@ clvarselgrfwd <- function(X, G = 1:9,
           }
       }
 
+    if(verbose) print(info)
     # Check if the variables in S have changed or not
     check2 <- colnames(S)
     if(is.null(check2)) # all variables have been removed

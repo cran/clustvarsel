@@ -21,7 +21,7 @@ clvarselgrfwd(X, G = 1:9,
               samp = FALSE, sampsize = 2000, 
               hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.diff = 0, itermax = 100, 
-              parallel = FALSE)
+              parallel = FALSE, verbose = FALSE)
 
 clvarselgrbkw(X, G = 1:9, 
               emModels1 = c("E","V"), 
@@ -29,7 +29,7 @@ clvarselgrbkw(X, G = 1:9,
               samp = FALSE, sampsize = 2000, 
               hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.diff = 0, itermax = 100,
-              parallel = FALSE)
+              parallel = FALSE, verbose = FALSE)
 
 clvarselhlfwd(X, G = 1:9,
               emModels1 = c("E","V"), 

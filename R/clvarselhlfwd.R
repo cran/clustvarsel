@@ -95,12 +95,12 @@ clvarselhlfwd <- function(X, G = 1:9,
     sBIC <- NULL
     # Fit the cluster model on the two variables
     try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                       initialization = list(hcPairs = hc(hcModel, cbind(S,NS[,i])[sub,]), subset = sub)),                       
+                       initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub)),                       
         silent = TRUE)
     # If we get all NA's from "VVV" starting hierarchical values use "EEE"
     if((allow.EEE) & sum(is.finite(sBIC$BIC))==0)
        try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                          initialization = list(hcPairs = hcEEE(cbind(S,NS[,i])[sub,]), subset = sub)),
+                          initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]), subset = sub)),
            silent = TRUE)
     # depBIC is the BIC for the clustering model with both variables
     if(sum(is.finite(sBIC$BIC))>0) 
@@ -288,12 +288,12 @@ clvarselhlfwd <- function(X, G = 1:9,
           
               # Fit the cluster model on the S variables with the proposed variable 
               try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                                 initialization = list(hcPairs = hc(hcModel, cbind(S,NS[,i])[sub,]), subset = sub)),
+                                 initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub)),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
               if((allow.EEE) & (sum(is.finite(sBIC$BIC))==0))
                 try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                                   initialization = list(hcPairs = hcEEE(cbind(S,NS[,i])[sub,]),
+                                   initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]),
                                                         subset = sub)),
                     silent = TRUE)
               # depBIC is the BIC for the clustering model with both S and proposed
@@ -409,12 +409,12 @@ clvarselhlfwd <- function(X, G = 1:9,
               sBIC <- NULL
               try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
                                  initialization = 
-                                 list(hcPairs = hc(hcModel, S[sub,-i,drop=FALSE]), subset = sub)),
+                                 list(hcPairs = hc(hcModel, data = S[sub,-i,drop=FALSE]), subset = sub)),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
               if(allow.EEE & (ncol(S) >= 3) & sum(is.finite(sBIC$BIC))==0)
                 { try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
-                                     initialization = list(hcPairs = hcEEE(S[sub,-i]),
+                                     initialization = list(hcPairs = hc("EEE", data = S[sub,-i]),
                                                            subset = sub)),
                       silent = TRUE) }
               else

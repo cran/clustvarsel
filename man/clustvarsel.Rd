@@ -15,7 +15,7 @@ clustvarsel(data,
             emModels1 = c("E", "V"), 
             emModels2 = mclust.options("emModelNames"),
             samp = FALSE, 
-            sampsize = 2000, 
+            sampsize = round(nrow(data)/2), 
             hcModel = "VVV", 
             allow.EEE = TRUE, 
             forcetwo = TRUE,
@@ -42,13 +42,13 @@ clustvarsel(data,
 
 \item{samp}{A logical value indicating whether or not a subset of observations is to be used in the hierarchical clustering phase used to get starting values for the EM algorithm.}
 
-\item{sampsize}{The number of observations to be used in the hierarchical clustering subset.}
+\item{sampsize}{The number of observations to be used in the hierarchical clustering subset. By default, a random sample of approximately half of the sample size is used.}
 
 \item{hcModel}{A character string specifying the model to be used in hierarchical clustering for choosing the starting values used by the EM algorithm. By default, the \code{"VVV"} covariance structure is employed (see \code{\link{hc}}).}
 
-\item{allow.EEE}{A logical value indicating whether a new clustering will be run with equal variance hierarchical clustering starting values if the clusterings with variable variance hierarchical clustering starting values do not produce any viable BIC values.}
+\item{allow.EEE}{A logical value indicating whether a new clustering will be run with equal within-cluster covariance for hierarchical clustering to get starting values, if the clusterings with variable within-cluster covariance for hierarchical clustering do not produce any viable BIC values.}
 
-\item{forcetwo}{A logical value indicating whether at least two variables will be forced to be selected initially (regardless of whether BIC evidence suggests bivariate clustering or not).}
+\item{forcetwo}{A logical value indicating whether at least two variables will be forced to be selected initially, regardless of whether BIC evidence suggests bivariate clustering or not.}
 
 \item{BIC.diff}{A numerical value indicating the minimum BIC difference between clustering and no clustering used to accept the inclusion of a variable in the set of clustering variables in a forward step of the greedy search algorithm. Furthermore, minus \code{BIC.diff} is used to accept the exclusion of a selected variable from the set of clustering variable in a backward step of the greedy search algorithm. Default is 0.}
 
@@ -58,7 +58,7 @@ clustvarsel(data,
 
 \item{itermax}{An integer value giving the maximum number of iterations (of addition and removal steps) the selected algorithm is allowed to run for.}
 
-\item{parallel}{This argument allows to specify if the selected algorithm should be run sequentially or in parallel. The possible values are: 
+\item{parallel}{This argument allows to specify if the selected \code{"greedy"} algorithm should be run sequentially or in parallel. The possible values are: 
 \itemize{
   \item a logical specifying if parallel computing should be used (\code{TRUE}) or not (\code{FALSE}, default) for running the algorithm;
   \item a numerical value which gives the number of cores to employ. By default, this is obtained from the function \code{\link[parallel]{detectCores}}; 
@@ -146,8 +146,7 @@ X[,3] = X[,1] + rnorm(n)
 X[,4] = rnorm(n, mean = 1.5, sd = 2)
 X[,5] = rnorm(n, mean = 2, sd = 1)
 # plot the data
-pairs(X, col = mclust.options("classPlotColors")[Class], 
-      pch = Class, gap = 0)
+clPairs(X, Class, gap = 0)
 
 # sequential forward greedy search (default)
 out = clustvarsel(X, G = 1:5)

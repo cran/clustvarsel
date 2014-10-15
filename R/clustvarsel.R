@@ -3,10 +3,16 @@ clustvarsel <- function(data, G = 1:9,
                         direction = c("forward", "backward"),
                         emModels1 = c("E", "V"), 
                         emModels2 = mclust.options("emModelNames"),
-                        samp = FALSE, sampsize = 2000, 
-                        hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE,
-                        BIC.diff = 0, BIC.upper = 0, BIC.lower = -10, 
-                        itermax = 100, parallel = FALSE)
+                        samp = FALSE, 
+                        sampsize = round(nrow(data)/2), 
+                        hcModel = "VVV", 
+                        allow.EEE = TRUE, 
+                        forcetwo = TRUE,
+                        BIC.diff = 0, 
+                        BIC.upper = 0, 
+                        BIC.lower = -10, 
+                        itermax = 100, 
+                        parallel = FALSE)
 {
 
   call <- match.call()
@@ -50,7 +56,8 @@ clustvarsel <- function(data, G = 1:9,
     }
   else stop("selected search and/or direction not available")
   
-  class(out) <- "clustvarsel"  
+  if(!is.null(out)) 
+    class(out) <- "clustvarsel"  
   return(out)
 }
 
@@ -62,7 +69,7 @@ print.clustvarsel <- function(x, digits = getOption("digits"), ...)
          "headlong" = cat("Headlong (", x$direction, ") search:\n", sep="")
          )
   print(x$steps.info, na.print = "", print.gap = 2, digits = digits, ...)
-  # cat("\nSelected subset:", paste(colnames(x$sel.var)))
-  cat("\nSelected subset:", paste(names(x$subset), collapse = ", "), "\n")
+  cat("\nSelected subset:",
+      paste(names(x$subset), collapse = ", "), fill = TRUE)
   invisible()
 }

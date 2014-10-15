@@ -8,7 +8,7 @@ clvarselgrbkw <- function(X, G = 1:9,
                           samp = FALSE, sampsize = 2000, 
                           hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
                           BIC.diff = 0, itermax = 100,
-                          parallel = FALSE)
+                          parallel = FALSE, verbose = FALSE)
 {
 
   X <- as.matrix(X)
@@ -30,17 +30,17 @@ clvarselgrbkw <- function(X, G = 1:9,
                      Step = NULL, Decision = NULL,
                      stringsAsFactors = FALSE)
   S <- X
-  NS <- matrix(NA, n, 0)
+  NS <- matrix(as.double(NA), n, 0)
 
   mod <- NULL
   try(mod <- Mclust(S, G = G, modelNames = emModels2,
-                    initialization = list(hcPairs = hc(hcModel, S[sub,]), 
+                    initialization = list(hcPairs = hc(hcModel, data = S[sub,]), 
                                           subset = sub)),
       silent = TRUE)
   # If we get all NA's from above starting hierarchical values use "EEE"
   if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
     { try(mod <- Mclust(S, G = G, modelNames = emModels2,
-                        initialization = list(hcPairs = hc("EEE", S[sub,]),
+                        initialization = list(hcPairs = hc("EEE", data = S[sub,]),
                                               subset = sub)),
           silent = TRUE)
     }
@@ -52,27 +52,34 @@ clvarselgrbkw <- function(X, G = 1:9,
   parallel <- if(is.logical(parallel)) 
                 { if(parallel) startParallel(parallel) else FALSE }
               else { startParallel(parallel) }
+  on.exit(if(parallel)
+          parallel::stopCluster(attr(parallel, "cluster")))
   # define operator to use depending on parallel being TRUE or FALSE
   `%DO%` <- if(parallel) `%dopar%` else `%do%`
   i <- NULL # dummy to trick R CMD check 
   
   criterion <- 1
   iter <- 0
-  while((criterion == 1) & (iter < itermax))
+  
+  while((criterion == 1) & (iter < itermax) & (ncol(S) > 1))
   {
    iter <- iter+1
    check1 <- colnames(S)
-    
+   
+   if(verbose) print(paste("iter", iter))
    # removing step
    out <- foreach(i = 1:ncol(S)) %DO% 
    {
+     if(verbose) print("removing step")
      # Calculate the BIC for the regression of the proposed variable on 
      # the other variable(s) in S
      BICreg <- BICreg(y = S[,i], x = S[,-i,drop=FALSE])        
      # Fit the cluster model on the S/{i} variables for 2 to G groups 
      mod <- NULL
-     hcPairs <- hc(if(ncol(S) > 2) hcModel else hcModel1,
-                   S[,-i,drop=FALSE][sub,])
+     hcPairs <- hc(modelName = if(ncol(S) > 2) hcModel else hcModel1,
+                   data = S[,-i,drop=FALSE][sub,],
+                   use = ifelse(ncol(S[,-i,drop=FALSE]) > 1,
+                                mclust.options("hcUse"), "VARS"))
      try(mod <- Mclust(S[,-i,drop=FALSE], G = G, 
                        modelNames = if(ncol(S) > 2) emModels2
                                                else emModels1,
@@ -82,7 +89,7 @@ clvarselgrbkw <- function(X, G = 1:9,
      # If we get all NA's from above starting hierarchical values use "EEE"
      if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
        { hcPairs <- hc(if(ncol(S) > 2) "EEE" else "E",
-                       S[,-i,drop=FALSE][sub,])
+                       data = S[,-i,drop=FALSE][sub,])
          try(mod <- Mclust(S[,-i,drop=FALSE], G = G, 
                            modelNames = if(ncol(S) > 2) emModels2
                                                    else emModels1,
@@ -132,11 +139,12 @@ clvarselgrbkw <- function(X, G = 1:9,
 
    if(ncol(NS) > 2)
      { # adding step 
+       if(verbose) print("adding step")
        out <- foreach(i = 1:ncol(NS)) %DO% 
        {
          # Fit clustering model with proposed variable
          hcPairs <- hc(if(ncol(S) > 0) hcModel else hcModel1,
-                       cbind(S,NS[,i])[sub,])
+                       data = cbind(S,NS[,i])[sub,])
          try(mod <- Mclust(cbind(S,NS[,i]), G = G, 
                            modelNames = if(ncol(S) > 0) emModels2
                                                    else emModels1,
@@ -146,7 +154,7 @@ clvarselgrbkw <- function(X, G = 1:9,
          # If we get all NA's from above starting hierarchical values use "EEE"
          if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
            { hcPairs <- hc(if(ncol(S) > 0) "EEE" else "E",
-                           cbind(S,NS[,i])[sub,])
+                           data = cbind(S,NS[,i])[sub,])
              try(mod <- Mclust(cbind(S,NS[,i]), G = G, 
                                modelNames = if(ncol(S) > 0) "EEE" else "E",
                                initialization = list(hcPairs = hcPairs,
@@ -190,7 +198,7 @@ clvarselgrbkw <- function(X, G = 1:9,
                          "Add","Rejected"))
          }
      }
-        
+   if(verbose) print(info)   
    # Check if the variables in S have changed or not
    check2 <- colnames(S)
    if(is.null(check2))

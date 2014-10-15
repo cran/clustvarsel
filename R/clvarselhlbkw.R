@@ -8,5 +8,5 @@ clvarselhlbkw <- function(X, G = 1:9,
                           itermax = 100)
 {
   warning("Headlong backward search is not currently available! Please use another type of search and/or direction.", immediate. = TRUE)
-  invisible(list())
+  invisible(NULL)
 }

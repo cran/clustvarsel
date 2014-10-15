@@ -1,3 +1,11 @@
 # Export all
-exportPattern("^[^\\.]")
+# exportPattern("^[^\\.]")
 
+export(clustvarsel, print.clustvarsel,
+       clvarselgrfwd, clvarselgrbkw, 
+       clvarselhlfwd, clvarselhlbkw, 
+       BICreg, startParallel)
+
+import(mclust, foreach, iterators)
+
+importFrom(BMA, bicreg)
