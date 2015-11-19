@@ -1,11 +1,16 @@
 # Export all
 # exportPattern("^[^\\.]")
 
+import("mclust", "foreach", "iterators")
+
+importFrom("BMA", bicreg)
+
+importFrom("stats", df.residual, lm.fit, residuals)
+
 export(clustvarsel, print.clustvarsel,
        clvarselgrfwd, clvarselgrbkw, 
        clvarselhlfwd, clvarselhlbkw, 
        BICreg, startParallel)
 
-import(mclust, foreach, iterators)
+S3method("print", "clustvarsel")
 
-importFrom(BMA, bicreg)

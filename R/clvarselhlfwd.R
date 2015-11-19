@@ -1,7 +1,6 @@
-# questa versione implementa le seguenti modifiche
-# - ok per samp e nosamp
-# - ok per G = 1:num.cluster
-# - utilizza bicreg per selezionare subset nella regressione
+#############################################################################
+## Headlong forward search
+#############################################################################
 
 clvarselhlfwd <- function(X, G = 1:9, 
                           emModels1 = c("E","V"), 
@@ -61,9 +60,6 @@ clvarselhlfwd <- function(X, G = 1:9,
   S <- X[,arg,drop=FALSE]
   # BICS is the BIC value for the clustering model with the variable(s) in S
   BICS <- maxBIC[arg]
-  # Luca: qui sotto da rimuovere
-  # temp <- BICdif[-arg]
-  # temp <- sort(temp, decreasing = TRUE, index.return = TRUE)$ix
   temp <- order(BICdif[-arg], decreasing = TRUE)
   # NS is the matrix of currently not selected variables
   NS <- as.matrix(X[,-arg])
@@ -183,11 +179,10 @@ clvarselhlfwd <- function(X, G = 1:9,
 
     # Addition step
     # For the special case where we have removed all the clustering variables/S 
-    # is empty
-    # Luca: è necessario??
+    # is empty [LS: is really needed??]
     if((NCOL(NS) != 0 & !is.null(ncol(NS))) & 
        (ncol(S) == 0) || (is.null(ncol(S))) )
-      { cat("\n really needed ??\n")
+      { # cat("\n really needed ??\n")
         depBIC <- 0
         DepBIC <- NULL
         crit <- -10
@@ -240,9 +235,9 @@ clvarselhlfwd <- function(X, G = 1:9,
           ind <- c(s,ns)
           if(!is.null(ind))
             { nks <- c(colnames(NS)[ind])
-              # NS is the not selected clustering variables whose recently calculated
-              # evidence of clustering BIC was higher than BIC.lower or variables 
-              # not yet looked at
+              # NS is the not selected clustering variables whose recently
+              # calculated evidence of clustering BIC was higher than BIC.lower
+              # or variables not yet looked at
               NS <- as.matrix(NS[,ind])
               colnames(NS)<-nks
             } 
@@ -266,7 +261,7 @@ clvarselhlfwd <- function(X, G = 1:9,
             { NS <- NULL }
         }
       } 
-      # Luca: è necessario?? END
+      # [LS: is really needed?? -- END]
     else
       {
         # Addition Step in general (for all cases except when S is empty)

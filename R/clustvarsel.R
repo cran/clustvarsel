@@ -63,13 +63,26 @@ clustvarsel <- function(data, G = 1:9,
 
 print.clustvarsel <- function(x, digits = getOption("digits"), ...) 
 {
-  cat("'", class(x)[1], "' model object:\n\n", sep = "")
-  switch(x$search,
-         "greedy"   = cat("Stepwise (", x$direction, ") greedy search:\n", sep=""),
-         "headlong" = cat("Headlong (", x$direction, ") search:\n", sep="")
-         )
-  print(x$steps.info, na.print = "", print.gap = 2, digits = digits, ...)
-  cat("\nSelected subset:",
-      paste(names(x$subset), collapse = ", "), fill = TRUE)
+  # cat("'", class(x)[1], "' model object:\n\n", sep = "")
+  dir <- switch(x$direction,
+                "forward" = "(forward/backward)",
+                "backward" = "(backward/forward)",
+                NULL)
+  header <- switch(x$search,
+                   "greedy"   = paste("Stepwise", dir, "greedy search"),
+                   "headlong" = paste("Headlong", dir, "search"),
+                   NULL)
+  cat(header, sep = "\n")
+  cat(paste(rep("-", nchar(header)), collapse =""), "\n")
+  info <- x$steps.info[,c(1,4,3,5),drop=FALSE]
+  print(info, na.print = "", print.gap = 2, digits = digits, ...)
+  cat("\n")
+  # cat("\nSelected subset:",
+  #    paste(names(x$subset), collapse = ", "), fill = TRUE)
+  footer <- strwrap(paste("Selected subset:", 
+                          paste(names(x$subset), collapse = ", ")),
+                    width = getOption("width"), simplify = TRUE, 
+                    indent = 0, exdent = 2)
+  cat(footer, sep = "\n")
   invisible()
 }

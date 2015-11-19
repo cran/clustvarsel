@@ -1,3 +1,7 @@
+#############################################################################
+##  Headlong backward search
+#############################################################################
+
 clvarselhlbkw <- function(X, G = 1:9, 
                           emModels1 = c("E","V"), 
                           emModels2 = mclust.options("emModelNames"),

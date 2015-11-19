@@ -1,3 +1,7 @@
+Version 2.2 (2015-11)
+  o reformat summary output from clustvarsel.
+  o add and update references in main help page.
+
 Version 2.1 (2014-10)
   o version associated with JSS paper submission.
   o add explicitly stop clusters if parallel is used.

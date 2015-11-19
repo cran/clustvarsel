@@ -2,10 +2,10 @@
 \alias{clustvarsel}
 \alias{print.clustvarsel}
   
-\title{Variable selection for Model-Based Clustering}
+\title{Variable Selection for Model-Based Clustering}
 
 \description{A function which implements variable selection methodology for model-based clustering which allows to find the (locally) optimal subset of variables in a dataset that have group/cluster information. 
-A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting  Mclust models. By default the algorithm uses a sequential search, but parallelization is also available.}
+A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting  Mclust models. By default the algorithm uses a sequential search, but parallelisation is also available.}
 
 \usage{
 clustvarsel(data, 
@@ -32,7 +32,7 @@ clustvarsel(data,
 
 \item{G}{An integer vector specifying the numbers of mixture components (clusters) for which the BIC is to be calculated. The default is \code{G = 1:9}.}
 
-\item{search}{A character vector indicating whether a \code{"greedy"} or potentially quicker but less optimal \code{"headlong"} algorithm is used to search for clustering variables.}
+\item{search}{A character vector indicating whether a \code{"greedy"} or, potentially quicker but less optimal, \code{"headlong"} algorithm is to be used in the search for clustering variables.}
 
 \item{direction}{A character vector indicating the type of search: \code{"forward"} starts from the empty model and at each step of the algorithm adds/removes a variable until the stopping criterion is satisfied; \code{"backward"} starts from the model with all the available variables and at each step of the algorithm removes/adds a variable until the stopping criterion is satisfied.}
 
@@ -44,7 +44,7 @@ clustvarsel(data,
 
 \item{sampsize}{The number of observations to be used in the hierarchical clustering subset. By default, a random sample of approximately half of the sample size is used.}
 
-\item{hcModel}{A character string specifying the model to be used in hierarchical clustering for choosing the starting values used by the EM algorithm. By default, the \code{"VVV"} covariance structure is employed (see \code{\link{hc}}).}
+\item{hcModel}{A character string specifying the model to be used in hierarchical clustering for choosing the starting values used by the EM algorithm. By default, the \code{"VVV"} covariance structure is used (see \code{\link{hc}}).}
 
 \item{allow.EEE}{A logical value indicating whether a new clustering will be run with equal within-cluster covariance for hierarchical clustering to get starting values, if the clusterings with variable within-cluster covariance for hierarchical clustering do not produce any viable BIC values.}
 
@@ -60,30 +60,32 @@ clustvarsel(data,
 
 \item{parallel}{This argument allows to specify if the selected \code{"greedy"} algorithm should be run sequentially or in parallel. The possible values are: 
 \itemize{
-  \item a logical specifying if parallel computing should be used (\code{TRUE}) or not (\code{FALSE}, default) for running the algorithm;
+  \item a logical value specifying if parallel computing should be used (\code{TRUE}) or not (\code{FALSE}, default) for running the algorithm;
   \item a numerical value which gives the number of cores to employ. By default, this is obtained from the function \code{\link[parallel]{detectCores}}; 
-  \item a character string specifying the type of parallelization to use. This depends on system OS: on Windows OS only \code{"snow"} type functionality is available, while on Unix/Linux/Mac OSX both \code{"snow"} and \code{"multicore"} (default) functionalities are available.
+  \item a character string specifying the type of parallelisation to use. This depends on system OS: on Windows OS only \code{"snow"} type functionality is available, while on Unix/Linux/Mac OSX both \code{"snow"} and \code{"multicore"} (default) functionalities are available.
   }
-Clearly, the last two options imply that the search is performed in parallel.
+Clearly, also the last two options imply that the search is performed in parallel.
 }
 }
 
 \details{
 This function implements variable selection methodology for model-based clustering. 
-
 The selection methods available are \code{"greedy"} search and \code{"headlong"} search (see argument \code{search}).
-The greedy search at each step either checks all the variables not currently included in the set of clustering variables singly for inclusion into the set, or checks all variables in the set of clustering variables singly for exclusion. 
-The headlong search only checks until a variable is included or excluded (i.e., does not necessarily check all possible variables for inclusion/exclusion at each step) and any variable with evidence of clustering below a certain level at any stage is removed from consideration for the remainder of the algorithm. 
-Greedy search can be performed forward-backward starting from the empty model, or backward-forward from the model with all the variables included (see argument \code{direction}). Currently, headlong search can only run forward-backward.
+The \emph{greedy search} at each step either checks all the variables not currently included in the set of clustering variables singly for inclusion into the set, or checks all variables in the set of clustering variables singly for exclusion. 
+The \emph{headlong search} only checks until a variable is included or excluded (i.e., does not necessarily check all possible variables for inclusion/exclusion at each step) and any variable with evidence of clustering below a certain level at any stage is removed from consideration for the remainder of the algorithm. 
+Greedy search can be performed \emph{forward-backward} starting from the empty model, or \emph{backward-forward} starting from the model with all the variables included (see argument \code{direction}). Currently, headlong search can only run \emph{forward-backward}.
 % Both greedy and headlong searches can be performed forward-backward starting from the empty model, or backward-forward from the model with all the variables included (see argument \code{direction}). 
 
-The criterion to assess each variable's evidence for being useful to the clustering is given by the difference between the BIC for the clustering model using the set of clustering variables already included and the variable being checked, and the sum of BICs for the model with clustering using the set of already selected clustering variables without the variable being checked and the model for the variable being checked being conditionally independent of the clustering given the other clustering variables (the latter is modeled as a regression of the variable being checked on the other clustering variables).
+The criterion to assess each variable's evidence for being useful to the clustering is given by the difference between the BIC for the clustering model using the set of clustering variables already included and the variable being checked, and the sum of BICs for the model with clustering using the set of already selected clustering variables without the variable being checked and the model for the variable being checked being conditionally independent of the clustering given the other clustering variables. The latter is modeled as a regression of the variable being checked on the other clustering variables. A subset selection procedure is also performed on the regression step.
 
-Clustering models are fitted using \code{\link[mclust]{Mclust}}, where each model is allowed to vary over the specified number of componenents \code{G} and any of the different covariance parameterizations set in \code{emModels1} and \code{emModels2}.
+Clustering models are fitted using \code{\link[mclust]{Mclust}}, where each model is allowed to vary over the specified number of components \code{G} and any of the different covariance parameterisations set in \code{emModels1} and \code{emModels2}.
 
 The default value for \code{forcetwo} is \code{TRUE} because often in practice there will be little evidence of clustering on the univariate or bivariate level although there is multivariate clustering present and these variables are used as starting points to attempt to find this clustering, if necessary being removed later in the algorithm.
 
-The default value for \code{allow.EEE} is \code{TRUE} but if necessary to speed up the algorithm it can be set to \code{FALSE}. Other speeding-up restrictions include reducing the \code{emModels1} (to \code{"E"}, say) and the \code{emModels2} to a smaller set of covariance parameterizations. Reducing the maximum possible number of clusters present in the data will also increase the speed of the algorithm. Another time-saving device is the \code{samp} option which uses the same algorithm but uses only a subset of the observations in the expensive hierarchical phase of \code{\link[mclust]{Mclust}}. The headlong search may be quicker than the greedy search option in data sets with large numbers of variables (depending on the values of the upper and lower bounds chosen for the BIC difference).
+The default value for \code{allow.EEE} is \code{TRUE} but if necessary to speed up the algorithm it can be set to \code{FALSE}. Other speeding-up restrictions include reducing the \code{emModels1} (to \code{"E"}, say) and the \code{emModels2} to a smaller set of covariance parameterisations. 
+Reducing the maximum possible number of clusters present in the data will also increase the speed of the algorithm.
+Another time-saving device is the \code{samp} option which uses the same algorithm but uses only a subset of the observations in the expensive hierarchical phase for initialisation of EM algorithm in \code{\link[mclust]{Mclust}}. 
+Finally, the headlong search may be quicker than the greedy search option in data sets with large numbers of variables (depending on the values of the upper and lower bounds chosen for the BIC difference).
 
 The defaults for the \code{eps}, \code{tol} and \code{itmax} options for the Mclust
 steps run in the algorithm can be changed by using the \code{\link[mclust]{mclust.options}} function.
@@ -111,17 +113,21 @@ steps run in the algorithm can be changed by using the \code{\link[mclust]{mclus
 }
 
 
-\references{A. E. Raftery and N. Dean (2006). Variable Selection for Model-Based Clustering, Journal of the American Statistical Association, Volume 101, no. 473, pp. 168-178
+\references{
+Raftery, A. E. and Dean, N. (2006) Variable Selection for Model-Based Clustering. \emph{Journal of the American Statistical Association}, 101(473), 168-178.
 \url{http://www.stat.washington.edu/www/research/reports/2004/tr452.pdf}
 
-J. H. Badsberg (1992). Model search in contingency tables by CoCo. In Y. Dodge and J. Whittaker (Eds.), Computational Statistics, Volume 1, pp. 251-256
+Badsberg, J. H. (1992) Model search in contingency tables by CoCo. In Dodge, Y. and Whittaker, J. (Eds.), \emph{Computational Statistics}, Volume 1, pp. 251-256
+
+Maugis, C., Celeux, G., Martin-Magniette M. (2009) Variable Selection for Clustering With Gaussian Mixture Models. \emph{Biometrics}, 65(3), 701-709.
+
+Scrucca, L. and Raftery, A. E. (2015) clustvarsel: A Package Implementing Variable Selection for Model-based Clustering in R. Submitted to \emph{Journal of Statistical Software}. 
+Pre-print available at \url{http://arxiv.org/abs/1411.0606}.
 }
 
 \author{N. Dean, A. E. Raftery, and L. Scrucca.}
 
-\seealso{
-% \code{\link{clvarselgr}}, \code{\link{clvarselhl}},
-\code{\link[mclust]{Mclust}}}
+\seealso{\code{\link[mclust]{Mclust}}}
 
 \examples{
 # Simulate data with 2 clusters in the first two variables and no 
@@ -162,7 +168,7 @@ table(Class, mod$classification)
 clustvarsel(X, G = 1:5, direction = "backward")
 
 # sequential backward greedy search with subsampling at hierarchical 
-# intialization stage
+# intialisation stage
 clustvarsel(X, G = 1:5, direction = "backward", 
             samp = TRUE, sampsize = 50)
 
