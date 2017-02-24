@@ -9,7 +9,7 @@ clvarselhlfwd <- function(X, G = 1:9,
                           hcModel = "VVV",
                           allow.EEE = TRUE, forcetwo = TRUE, 
                           BIC.upper = 0, BIC.lower = -10,
-                          itermax = 100)
+                          itermax = 100, verbose = FALSE)
 {
   X <- as.matrix(X)
   n <- nrow(X) # number of rows=number of observations
@@ -21,13 +21,16 @@ clvarselhlfwd <- function(X, G = 1:9,
   else     { sub <- seq.int(1,n) }
 
   # First Step - selecting single variable and ordering
-  maxBIC <- BICdif <- oneBIC <- rep(NA,d)
+  if(verbose) cat(paste("iter 1\n+ adding step\n"))
+  maxBIC <- BICdiff <- oneBIC <- rep(NA,d)
+  ModelG <- vector(mode = "list", length = d)
   for(i in 1:d)
   { 
     xBIC <- NULL
     # Fit the single variable cluster models
     try(xBIC <- Mclust(X[,i], G = G, modelNames = emModels1,
-                       initialization = list(subset = sub)),
+                       initialization = list(subset = sub),
+                       verbose = FALSE),
         silent = TRUE)
     if(is.null(xBIC)) 
        try(xBIC <- Mclust(X[,i], G = G, modelNames = emModels1),
@@ -36,7 +39,8 @@ clvarselhlfwd <- function(X, G = 1:9,
     if((allow.EEE) & sum(is.finite(xBIC$BIC))==0)
       try(xBIC <- Mclust(X[,i], G = G, modelNames = emModels1, 
                          initialization = list(hcPairs = hcE(X[sub,i]),
-                                               subset = sub)),
+                                               subset = sub),
+                         verbose = FALSE),
           silent = TRUE)
     # maxBIC is the maximum BIC over all clustering models fit
     if(sum(is.finite(xBIC$BIC))==0) 
@@ -45,22 +49,24 @@ clvarselhlfwd <- function(X, G = 1:9,
        maxBIC[i] <- max(xBIC$BIC[is.finite(xBIC$BIC)])
     # Fit and get BIC for a single component no-cluster normal model
     try(oneBIC[i] <- Mclust(X[,i], G = 1, modelNames = emModels1,
-                            initialization = list(subset = sub))$BIC[1],
+                            initialization = list(subset = sub),
+                            verbose = FALSE)$BIC[1],
         silent = TRUE)
     # Difference between maximum BIC for clustering and BIC for no clustering
-    BICdif[i] <- c(maxBIC[i] - oneBIC[i])
+    BICdiff[i] <- c(maxBIC[i] - oneBIC[i])
+    ModelG[[i]] <- c(xBIC$modelName, xBIC$G)
   }
   
   # Find the single variable with the biggest difference between 
   # clustering and no clustering
-  m <- max(BICdif[is.finite(BICdif)])
-  arg <- which(BICdif==m,arr.ind=TRUE)[1]
+  m <- max(BICdiff[is.finite(BICdiff)])
+  arg <- which(BICdiff==m,arr.ind=TRUE)[1]
   # This is our first selected variable/S is the matrix of currently selected
   # clustering variables
   S <- X[,arg,drop=FALSE]
   # BICS is the BIC value for the clustering model with the variable(s) in S
   BICS <- maxBIC[arg]
-  temp <- order(BICdif[-arg], decreasing = TRUE)
+  temp <- order(BICdiff[-arg], decreasing = TRUE)
   # NS is the matrix of currently not selected variables
   NS <- as.matrix(X[,-arg])
   # This orders NS in terms of strongest evidence of univariate clustering 
@@ -69,12 +75,22 @@ clvarselhlfwd <- function(X, G = 1:9,
   # info records the proposed variable, BIC for the S matrix and difference 
   # in BIC for clustering versus no clustering on S, whether it was an 
   # addition step and if it was accepted
-  info <- data.frame(Var = colnames(S), BIC = BICS, BICdif = BICdif[arg], 
+  info <- data.frame(Var = colnames(S), 
+                     BIC = BICS, BICdiff = BICdiff[arg], 
                      Step = "Add", Decision = "Accepted",
+                     Model = ModelG[[arg]][1], 
+                     G = ModelG[[arg]][2],
                      stringsAsFactors = FALSE)
+  info$BIC <- as.numeric(info$BIC)
+  info$BICdiff <- as.numeric(info$BICdiff)
 
   # Second Step - selecting second variable
+  if(verbose) 
+    { print(info[,c(1,3:5),drop=FALSE])
+      cat(paste("iter 2\n+ adding step\n")) }
+  
   depBIC <- cindepBIC <- cdiff <- rep(NA, ncol(NS))
+  ModelG <- vector(mode = "list", length = ncol(NS))
   crit <- -Inf
   i <- 0
   # We only run until we find a variable whose difference in BIC between 
@@ -91,12 +107,18 @@ clvarselhlfwd <- function(X, G = 1:9,
     sBIC <- NULL
     # Fit the cluster model on the two variables
     try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                       initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub)),                       
+                       initialization = list(hcPairs = hc(hcModel, 
+                                                          data = cbind(S,NS[,i])[sub,]), 
+                                                          subset = sub),
+                       verbose = FALSE),
         silent = TRUE)
     # If we get all NA's from "VVV" starting hierarchical values use "EEE"
     if((allow.EEE) & sum(is.finite(sBIC$BIC))==0)
        try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                          initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]), subset = sub)),
+                          initialization = list(hcPairs = hc("EEE", 
+                                                             data = cbind(S,NS[,i])[sub,]), 
+                                                             subset = sub),
+                          verbose = FALSE),
            silent = TRUE)
     # depBIC is the BIC for the clustering model with both variables
     if(sum(is.finite(sBIC$BIC))>0) 
@@ -107,6 +129,7 @@ clvarselhlfwd <- function(X, G = 1:9,
     cdiff[i] <- depBIC[i] - cindepBIC[i]
     if(!is.finite(cdiff[i])) cdiff[i] <- BIC.upper
     crit <- cdiff[i]
+    ModelG[[i]] <- c(sBIC$modelName, sBIC$G)
   }
   depBIC <- depBIC[1:i]
   cindepBIC <- cindepBIC[1:i]
@@ -121,7 +144,8 @@ clvarselhlfwd <- function(X, G = 1:9,
     S <- cbind(S,NS[,i])
     colnames(S) <- k
     BICS <- depBIC[i]
-    info <- rbind(info, c(colnames(NS)[i],BICS,cdiff[i],"Add","Accepted"))
+    info <- rbind(info, c(colnames(NS)[i], BICS, cdiff[i],
+                          "Add", "Accepted", ModelG[[i]]))
     ns <- s <- NULL
     if(i < ncol(NS))
       ns <- seq(i+1, ncol(NS))
@@ -150,7 +174,8 @@ clvarselhlfwd <- function(X, G = 1:9,
         S <- cbind(S,NS[,i])
         colnames(S) <- k
         BICS <- depBIC[i]
-        info <- rbind(info, c(colnames(NS)[i],BICS,cdiff[i],"Add","Accepted"))
+        info <- rbind(info, c(colnames(NS)[i], BICS, cdiff[i],
+                              "Add", "Accepted", ModelG[[i]]))
         nks <- c(colnames(NS)[-i])
         # NS is the not selected clustering variables whose recently calculated
         # evidence of clustering BIC was higher than BIC.lower
@@ -166,10 +191,15 @@ clvarselhlfwd <- function(X, G = 1:9,
     else
       { m <- max(cdiff[is.finite(cdiff)])
         i <- which(cdiff==m,arr.ind=TRUE)[1]
-        info <- rbind(info, c(colnames(NS)[i],BICS,cdiff[i],"Add","Rejected"))
+        info <- rbind(info, c(colnames(NS)[i], BICS, cdiff[i],
+                              "Add", "Rejected", ModelG[[i]]))
       }
   }
+  info$BIC <- as.numeric(info$BIC)
+  info$BICdiff <- as.numeric(info$BICdiff)
 
+  if(verbose) print(info[2,c(1,3:5),drop=FALSE])
+  
   criterion <- 1
   iter <- 0
   while((criterion == 1) & (iter < itermax))
@@ -177,7 +207,10 @@ clvarselhlfwd <- function(X, G = 1:9,
     iter <- iter+1
     check1 <- colnames(S)
 
+    if(verbose) cat(paste("iter", iter+2, "\n"))
+    
     # Addition step
+    if(verbose) cat("+ adding step\n")
     # For the special case where we have removed all the clustering variables/S 
     # is empty [LS: is really needed??]
     if((NCOL(NS) != 0 & !is.null(ncol(NS))) & 
@@ -189,6 +222,7 @@ clvarselhlfwd <- function(X, G = 1:9,
         cdiff <- 0
         Cdiff <- NULL
         oneBIC <- rep(NA,d)
+        ModelG <- vector(mode = "list", length = d)
         i <- 0
         crit <- -10
         while((crit <= BIC.upper) & (i < ncol(NS)))
@@ -197,13 +231,15 @@ clvarselhlfwd <- function(X, G = 1:9,
           i <- i+1
           # Fit the cluster models 
           try(xBIC <- Mclust(X[,i], G = G, modelNames = emModels1,
-                             initialization = list(subset = sub)),
+                             initialization = list(subset = sub),
+                             verbose = FALSE),
               silent = TRUE)
           # If we get all NA's from "V" starting hierarchical values use "E"
           if((allow.EEE) & sum(is.finite(xBIC$BIC))==0)
              try(xBIC <- Mclust(X[,i], G = G, modelNames = emModels1,
                                 initialization = list(hcPairs = hcE(X[sub,i]),
-                                                      subset = sub)),
+                                                      subset = sub),
+                                verbose = FALSE),
                  silent = TRUE)
           # depBIC is the maximum BIC over all clustering models fit
           if(sum(is.finite(xBIC$BIC)) == 0) 
@@ -212,13 +248,14 @@ clvarselhlfwd <- function(X, G = 1:9,
             depBIC <- max(xBIC$BIC[is.finite(xBIC$BIC)])
           DepBIC <- c(DepBIC,depBIC)
           # Fit and get BIC for a single component no-cluster normal model
-          try(oneBIC <- Mclust(X[,i], G = 1, modelNames = "V")$BIC[1],
+          try(oneBIC <- Mclust(X[,i], G = 1, modelNames = "V", verbose = FALSE)$BIC[1],
               silent = TRUE)
           # Difference between maximum BIC for clustering and BIC for no clustering
           cdiff <- c(depBIC - oneBIC)
           if(!is.finite(cdiff)) cdiff <- BIC.upper
           Cdiff <- c(Cdiff,cdiff)
           crit <- cdiff
+          ModelG[[i]] <- c(xBIC$modelName, xBIC$G)
         }
         if(cdiff > BIC.upper)
         { # ie. evidence is stronger for including variable in S
@@ -226,7 +263,8 @@ clvarselhlfwd <- function(X, G = 1:9,
           S <- as.matrix(NS[,i])
           colnames(S) <- k
           BICS <- depBIC
-          info <- rbind(info, c(colnames(NS)[i],BICS,cdiff,"Add","Accepted"))
+          info <- rbind(info, c(colnames(NS)[i], BICS, cdiff,
+                                "Add", "Accepted", ModelG[[i]]))
           ns <- s <- NULL
           # i is the index of those variables not selected but whose evidence of
           # clustering BIC did not fall below BIC.lower or those not looked at yet
@@ -248,7 +286,8 @@ clvarselhlfwd <- function(X, G = 1:9,
         {
           m <- max(Cdiff[is.finite(Cdiff)])
           i <- which(Cdiff==m,arr.ind=TRUE)[1]
-          info <- rbind(info, c(colnames(NS)[i],BICS,Cdiff[i],"Add","Rejected"))
+          info <- rbind(info, c(colnames(NS)[i], BICS, Cdiff[i],
+                                "Add", "Rejected", ModelG[[i]]))
           ind <- seq(ncol(NS))[which(Cdiff > BIC.lower)]
           if(!is.null(ind))
             { k <- colnames(NS)[ind]
@@ -268,6 +307,7 @@ clvarselhlfwd <- function(X, G = 1:9,
         if((NCOL(NS) != 0) & !is.null(ncol(NS)))
           {
             depBIC <- cindepBIC <- cdiff <- rep(NA, ncol(NS))
+            ModelG <- vector(mode = "list", length = ncol(NS))
             crit <- -Inf
             i <- 0
             # We only run until we find a variable whose difference in BIC 
@@ -283,13 +323,18 @@ clvarselhlfwd <- function(X, G = 1:9,
           
               # Fit the cluster model on the S variables with the proposed variable 
               try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                                 initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub)),
+                                 initialization = list(hcPairs = hc(hcModel, 
+                                                                    data = cbind(S,NS[,i])[sub,]), 
+                                                                    subset = sub),
+                                 verbose = FALSE),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
               if((allow.EEE) & (sum(is.finite(sBIC$BIC))==0))
                 try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                                   initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]),
-                                                        subset = sub)),
+                                   initialization = list(hcPairs = hc("EEE", 
+                                                                      data = cbind(S,NS[,i])[sub,]),
+                                                                      subset = sub),
+                                   verbose = FALSE),
                     silent = TRUE)
               # depBIC is the BIC for the clustering model with both S and proposed
               # variable
@@ -301,6 +346,7 @@ clvarselhlfwd <- function(X, G = 1:9,
               cdiff[i] <- depBIC[i] - cindepBIC[i]
               if(!is.finite(cdiff[i])) cdiff[i] <- BIC.upper
               crit <- cdiff[i]
+              ModelG[[i]] <- c(sBIC$modelName, sBIC$G)
             }
             depBIC <- depBIC[1:i]
             cindepBIC <- cindepBIC[1:i]
@@ -313,8 +359,8 @@ clvarselhlfwd <- function(X, G = 1:9,
               S <- cbind(S,NS[,i])
               colnames(S) <- k
               BICS <- depBIC[i]
-              info <- rbind(info,
-                            c(colnames(NS)[i],BICS,cdiff[i],"Add","Accepted"))
+              info <- rbind(info, c(colnames(NS)[i], BICS, cdiff[i],
+                                    "Add", "Accepted", ModelG[[i]]))
               ns <- s <- NULL
               # Exclude variables in NS whose evidence of clustering in this step 
               # was lower than BIC.lower
@@ -330,11 +376,11 @@ clvarselhlfwd <- function(X, G = 1:9,
                 { NS <- NULL }
             } 
             else
-            {
+            { 
               m <- max(cdiff[is.finite(cdiff)])
               i <- which(cdiff==m,arr.ind=TRUE)[1]
-              info <- rbind(info,
-                            c(colnames(NS)[i],BICS,cdiff[i],"Add","Rejected"))
+              info <- rbind(info, c(colnames(NS)[i], depBIC[i], cdiff[i],
+                                    "Add", "Rejected", ModelG[[i]]))
               ind <- seq(1,ncol(NS))[which(cdiff > BIC.lower)]
               if(!is.null(ind))
                 { k <- colnames(NS)[ind]
@@ -350,11 +396,13 @@ clvarselhlfwd <- function(X, G = 1:9,
       }
 
     # Removal Step for the special case where S contains only a single variable
+    if(verbose) cat("- removing step\n")
     if(ncol(S) == 1)
       { cdiff <- 0
         oneBIC <- NA
         try(oneBIC <- Mclust(S, G = 1, modelNames = "V", 
-                             initialization = list(subset = sub))$BIC[1], 
+                             initialization = list(subset = sub),
+                             verbose = FALSE)$BIC[1], 
             silent = TRUE)
         # Difference between maximum BIC for clustering and BIC for no clustering
         cdiff <- BICS - oneBIC
@@ -365,7 +413,9 @@ clvarselhlfwd <- function(X, G = 1:9,
             # if negative remove the variable from S and set the BIC for 
             # the model to NA
             BICS <- NA
-            info <- rbind(info, c(colnames(S),BICS,cdiff,"Remove","Accepted"))
+            info <- rbind(info, c(colnames(S), BICS, cdiff, 
+                                  "Remove", "Accepted", 
+                                  oneBIC$modelName, oneBIC$G))
             # Only return variable to NS if difference is greater than BIC.lower
             if(cdiff > BIC.lower)
               { k <- c(colnames(NS),colnames(S))
@@ -377,7 +427,9 @@ clvarselhlfwd <- function(X, G = 1:9,
               { S <- NULL }
           } 
         else
-          { info <- rbind(info, c(colnames(S),BICS,cdiff,"Remove","Rejected")) }
+          { info <- rbind(info, c(colnames(S), BICS, cdiff,
+                                  "Remove", "Rejected",
+                                  oneBIC$modelName, oneBIC$G)) }
       } 
     else
       {
@@ -386,6 +438,7 @@ clvarselhlfwd <- function(X, G = 1:9,
         if(ncol(S) >= 2)
           { depBIC <- BICS
             cindepBIC <- rdep <- cdiff <- rep(NA, ncol(S))
+            ModelG <- vector(mode = "list", length = ncol(S))
             crit <- Inf
             i <- 0
             # Check if the data is at least 3 dimensional
@@ -404,19 +457,25 @@ clvarselhlfwd <- function(X, G = 1:9,
               sBIC <- NULL
               try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
                                  initialization = 
-                                 list(hcPairs = hc(hcModel, data = S[sub,-i,drop=FALSE]), subset = sub)),
+                                 list(hcPairs = hc(hcModel, 
+                                                   data = S[sub,-i,drop=FALSE]), 
+                                                   subset = sub),
+                                 verbose = FALSE),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
               if(allow.EEE & (ncol(S) >= 3) & sum(is.finite(sBIC$BIC))==0)
                 { try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
-                                     initialization = list(hcPairs = hc("EEE", data = S[sub,-i]),
-                                                           subset = sub)),
+                                     initialization = list(hcPairs = hc("EEE", 
+                                                                        data = S[sub,-i]),
+                                                                        subset = sub),
+                                     verbose = FALSE),
                       silent = TRUE) }
               else
                 { if((allow.EEE) & (ncol(S)==2) & sum(is.finite(sBIC$BIC))==0)
                     { try(sBIC <- Mclust(as.matrix(S[,-i]), G = G, modelNames = name,
                                          initialization = list(hcPairs = hcE(S[sub,-i,drop=FALSE]), 
-                                                               subset = sub)),
+                                                               subset = sub),
+                                         verbose = FALSE),
                           silent = TRUE) }
                 } 
               if(sum(is.finite(sBIC$BIC))>0) 
@@ -428,13 +487,14 @@ clvarselhlfwd <- function(X, G = 1:9,
               cdiff[i] <- depBIC - cindepBIC[i]
               if(!is.finite(cdiff[i])) cdiff[i] <- BIC.upper
               crit <- cdiff[i]
+              ModelG[[i]] <- c(sBIC$modelName, sBIC$G)
             }
             if((cdiff[i] < BIC.upper) & (cdiff[i] > BIC.lower))
               { # i.e. evidence is stronger for excluding variable from S but 
                 # still including it in NS
                 BICS <- rdep[i]
                 info <- rbind(info, c(colnames(S)[i], BICS, cdiff[i],
-                              "Remove","Accepted"))
+                              "Remove", "Accepted", ModelG[[i]]))
                 k <- c(colnames(NS),colnames(S)[i])
                 nk <- colnames(S)[-i]
                 NS <- cbind(NS,S[,i])
@@ -447,7 +507,7 @@ clvarselhlfwd <- function(X, G = 1:9,
                   { # exclude variable entirely
                     BICS <- rdep[i]
                     info <- rbind(info, c(colnames(S)[i], BICS, cdiff[i],
-                                  "Remove","Accepted"))
+                                  "Remove", "Accepted", ModelG[[i]]))
                     nk <- colnames(S)[-i]
                     S <- as.matrix(S[,-i])
                     colnames(S) <- nk
@@ -455,12 +515,18 @@ clvarselhlfwd <- function(X, G = 1:9,
                 else
                   { m <- min(cdiff[is.finite(cdiff)])
                     i <- which(cdiff==m,arr.ind=TRUE)[1]
-                    info <- rbind(info, c(colnames(S)[i], BICS, cdiff[i],
-                                  "Remove","Rejected"))
+                    info <- rbind(info, c(colnames(S)[i], rdep[i], cdiff[i],
+                                  "Remove", "Rejected", ModelG[[i]]))
                   }
               }
           }
-        }
+      }
+    info$BIC <- as.numeric(info$BIC)
+    info$BICdiff <- as.numeric(info$BICdiff)
+    
+    if(verbose) 
+      print(info[seq(nrow(info)-1,nrow(info)),c(1,3:5),drop=FALSE])
+    
     # Check if the variables in S have changed or not
     check2 <- colnames(S)
     if(is.null(check2)) # all variables have been removed
@@ -481,11 +547,12 @@ clvarselhlfwd <- function(X, G = 1:9,
     warning("Algorithm stopped because maximum number of iterations was reached")
 
   # List the selected variables and the matrix of steps' information
-  info[,2] = as.numeric(info[,2])
-  info[,3] = as.numeric(info[,3])
-  colnames(info) <- c("Variable proposed", "BIC", "BIC difference", 
-                      "Type of step", "Decision")
-  # colnames(info) <- c("Variable proposed","BIC of new clustering variables set","BIC difference","Type of step","Decision")
+  info$BIC <- as.numeric(info$BIC)
+  info$BICdiff <- as.numeric(info$BICdiff)
+  # reorder steps.info
+  info <- info[,c(1,4,2,6,7,3,5),drop=FALSE]
+  colnames(info) <- c("Variable proposed", "Type of step",
+                      "BICclust", "Model", "G", "BICdiff", "Decision")
   varnames <- colnames(X)
   subset <- sapply(colnames(S), function(x) which(x == varnames))
 

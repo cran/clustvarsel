@@ -12,7 +12,8 @@ clustvarsel <- function(data, G = 1:9,
                         BIC.upper = 0, 
                         BIC.lower = -10, 
                         itermax = 100, 
-                        parallel = FALSE)
+                        parallel = FALSE,
+                        verbose = interactive())
 {
 
   call <- match.call()
@@ -56,26 +57,31 @@ clustvarsel <- function(data, G = 1:9,
     }
   else stop("selected search and/or direction not available")
   
-  if(!is.null(out)) 
-    class(out) <- "clustvarsel"  
+  if(!is.null(out))
+    { class(out) <- "clustvarsel" }
+  
   return(out)
 }
 
 print.clustvarsel <- function(x, digits = getOption("digits"), ...) 
 {
   # cat("'", class(x)[1], "' model object:\n\n", sep = "")
+  header1 <- c("Variable selection for Gaussian model-based clustering")
   dir <- switch(x$direction,
                 "forward" = "(forward/backward)",
                 "backward" = "(backward/forward)",
                 NULL)
-  header <- switch(x$search,
-                   "greedy"   = paste("Stepwise", dir, "greedy search"),
-                   "headlong" = paste("Headlong", dir, "search"),
-                   NULL)
-  cat(header, sep = "\n")
-  cat(paste(rep("-", nchar(header)), collapse =""), "\n")
-  info <- x$steps.info[,c(1,4,3,5),drop=FALSE]
-  print(info, na.print = "", print.gap = 2, digits = digits, ...)
+  header2 <- switch(x$search,
+                    "greedy"   = paste("Stepwise", dir, "greedy search"),
+                    "headlong" = paste("Headlong", dir, "search"),
+                    NULL)
+  sep <- paste(rep("-", max(nchar(header1),nchar(header2))), collapse ="") 
+  cat(sep, "\n")
+  cat(header1, sep = "\n")
+  cat(header2, sep = "\n")
+  cat(sep, "\n\n")
+  #
+  print(x$steps.info, na.print = "", row.names = FALSE, digits = digits, ...)
   cat("\n")
   # cat("\nSelected subset:",
   #    paste(names(x$subset), collapse = ", "), fill = TRUE)

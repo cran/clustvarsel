@@ -38,7 +38,7 @@ clvarselhlfwd(X, G = 1:9,
               hcModel = "VVV",
               allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.upper = 0, BIC.lower = -10,
-              itermax = 100)
+              itermax = 100, verbose = FALSE)
 
 clvarselhlbkw(X, G = 1:9,
               emModels1 = c("E","V"), 
@@ -47,7 +47,7 @@ clvarselhlbkw(X, G = 1:9,
               hcModel = "VVV",
               allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.upper = 0, BIC.lower = -10,
-              itermax = 100)
+              itermax = 100, verbose = FALSE)
 
 BICreg(x, y)
 

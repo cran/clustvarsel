@@ -4,10 +4,19 @@ startParallel <- function(parallel = TRUE, ...)
   
   # check availability of parallel and doParallel (their dependencies, i.e. 
   # foreach and iterators, are specified as Depends on package DESCRIPTION file)
-  
   if(!all(requireNamespace("parallel", quietly = TRUE),
           requireNamespace("doParallel", quietly = TRUE)))     
      stop("packages 'parallel' and 'doParallel' required for parallelization!")
+  
+  # if a cluster is provided as input argument use that cluster and exit
+  if(any(class(parallel) == "cluster"))
+    { cl <- parallel
+      parallel <- TRUE
+      attr(parallel, "type") <- getDoParName()
+      attr(parallel, "cores") <- getDoParWorkers()
+      attr(parallel, "cluster") <- cl
+      return(parallel)
+  }
   
   # set default parallel functionality depending on system OS:
   # - snow functionality on Windows OS

@@ -1,10 +1,19 @@
+Version 2.3 (2017-01)
+  o Add optional argument 'verbose' to clustvarsel() for printing steps
+    info during the search.
+  o New print method for 'clustvarsel' objects.
+  o A parallel cluster is automatically stopped unless a registered parallel
+    back end is provided as argument to 'parallel' argument in the 
+    clustvarsel() function call.
+  o Add "A quick tour of clustvarsel" vignette.
+  
 Version 2.2 (2015-11)
   o reformat summary output from clustvarsel.
   o add and update references in main help page.
 
 Version 2.1 (2014-10)
   o version associated with JSS paper submission.
-  o add explicitly stop clusters if parallel is used.
+  o add explicitly stop of clusters if parallel is used.
   o specifically included in the hc() function call the argument name 'data = ...' 
     so that works with both mclust version 4.4 and upper.
   o other bug fixes and improvements.

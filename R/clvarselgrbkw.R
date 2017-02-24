@@ -24,24 +24,27 @@ clvarselgrbkw <- function(X, G = 1:9,
 
   hcModel1 <- if(any(grep("V", hcModel))) "V" else "E"
 
-  # info records the proposed variable, BIC for the S matrix and difference 
-  # in BIC for clustering versus no clustering on S
-  info <- data.frame(Var = NULL, BIC = NULL, BICdif = NULL, 
-                     Step = NULL, Decision = NULL,
-                     stringsAsFactors = FALSE)
+  # info records the proposed variable, BIC for clustering using the S matrix
+  # and BICdiff for BIC difference of clustering versus no clustering on S
+  info <- as.data.frame(matrix(as.double(NA), nrow = 0, ncol = 7))
+  #info <- data.frame(Var = NULL, BIC = NULL, BICdiff = NULL, 
+  #                   Step = NULL, Decision = NULL,
+  #                   stringsAsFactors = FALSE)
   S <- X
   NS <- matrix(as.double(NA), n, 0)
 
   mod <- NULL
   try(mod <- Mclust(S, G = G, modelNames = emModels2,
                     initialization = list(hcPairs = hc(hcModel, data = S[sub,]), 
-                                          subset = sub)),
+                                          subset = sub),
+                    verbose = FALSE),
       silent = TRUE)
   # If we get all NA's from above starting hierarchical values use "EEE"
   if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
     { try(mod <- Mclust(S, G = G, modelNames = emModels2,
                         initialization = list(hcPairs = hc("EEE", data = S[sub,]),
-                                              subset = sub)),
+                                              subset = sub),
+                        verbose = FALSE),
           silent = TRUE)
     }
   # BICS is the BIC for the clustering model with all variables in S
@@ -49,11 +52,20 @@ clvarselgrbkw <- function(X, G = 1:9,
           else max(mod$BIC[is.finite(mod$BIC)])
 
   # Start "parallel backend" if needed
-  parallel <- if(is.logical(parallel)) 
-                { if(parallel) startParallel(parallel) else FALSE }
-              else { startParallel(parallel) }
-  on.exit(if(parallel)
-          parallel::stopCluster(attr(parallel, "cluster")))
+  if(is.logical(parallel))
+    { if(parallel) 
+        { parallel <- startParallel(parallel)
+          stopCluster <- TRUE }
+      else
+      { parallel <- stopCluster <- FALSE } 
+    }
+  else
+    { stopCluster <- if(inherits(parallel, "cluster")) FALSE else TRUE
+      parallel <- startParallel(parallel) 
+    }
+  on.exit(if(parallel & stopCluster)
+          parallel::stopCluster(attr(parallel, "cluster")) )
+
   # define operator to use depending on parallel being TRUE or FALSE
   `%DO%` <- if(parallel) `%dopar%` else `%do%`
   i <- NULL # dummy to trick R CMD check 
@@ -66,11 +78,11 @@ clvarselgrbkw <- function(X, G = 1:9,
    iter <- iter+1
    check1 <- colnames(S)
    
-   if(verbose) print(paste("iter", iter))
+   if(verbose) cat(paste("iter", iter, "\n"))
    # removing step
+   if(verbose) cat("- removing step\n")
    out <- foreach(i = 1:ncol(S)) %DO% 
    {
-     if(verbose) print("removing step")
      # Calculate the BIC for the regression of the proposed variable on 
      # the other variable(s) in S
      BICreg <- BICreg(y = S[,i], x = S[,-i,drop=FALSE])        
@@ -84,7 +96,8 @@ clvarselgrbkw <- function(X, G = 1:9,
                        modelNames = if(ncol(S) > 2) emModels2
                                                else emModels1,
                        initialization = list(hcPairs = hcPairs, 
-                                             subset = sub)),
+                                             subset = sub),
+                       verbose = FALSE),
          silent = TRUE)
      # If we get all NA's from above starting hierarchical values use "EEE"
      if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
@@ -94,14 +107,15 @@ clvarselgrbkw <- function(X, G = 1:9,
                            modelNames = if(ncol(S) > 2) emModels2
                                                    else emModels1,
                            initialization = list(hcPairs = hcPairs, 
-                                                 subset = sub)),
+                                                 subset = sub),
+                           verbose = FALSE),
              silent = TRUE) 
        }
      # BIC for the no clustering model on S/{j} 
      BICnotclust <- if(sum(is.finite(mod$BIC))==0) NA
                     else (max(mod$BIC[is.finite(mod$BIC)]) + BICreg)
      #
-     return(c(BICreg, BICnotclust))
+     return(list(BICreg, BICnotclust, mod$modelName, mod$G))
    }
    BICreg <- sapply(out, "[[", 1)
    BICnotclust <- sapply(out, "[[", 2)
@@ -119,12 +133,14 @@ clvarselgrbkw <- function(X, G = 1:9,
        k <- colnames(S)[-arg]
        if(nrow(info) > 0)
          info <- rbind(info,
-                       c(colnames(S)[arg],BICS,cdiff[arg], 
-                       "Remove", "Accepted")) 
+                       c(colnames(S)[arg], BICS, cdiff[arg], 
+                       "Remove", "Accepted", out[[arg]][3:4])) 
        else
-         info <- data.frame(Var = colnames(S)[arg], BIC = BICS, 
-                            BICdif = cdiff[arg], 
+         info <- data.frame(Var = colnames(S)[arg], 
+                            BIC = BICS, BICdiff = cdiff[arg], 
                             Step = "Remove", Decision = "Accepted",
+                            Model = out[[arg]][[3]],
+                            G = out[[arg]][[4]],
                             stringsAsFactors = FALSE)
        NS <- cbind(NS, S[,arg])
        S <- S[,-arg,drop=FALSE]
@@ -132,24 +148,25 @@ clvarselgrbkw <- function(X, G = 1:9,
        colnames(S) <- k
      } 
    else
-     { info <- rbind(info,
-                     c(colnames(S)[arg],BICS,cdiff[arg],
-                     "Remove","Rejected"))
+     { info <- rbind(info, c(colnames(S)[arg], 
+                             (BICnotclust-BICreg)[arg], cdiff[arg],
+                             "Remove", "Rejected", out[[arg]][3:4]))
      }
 
    if(ncol(NS) > 2)
      { # adding step 
-       if(verbose) print("adding step")
+       if(verbose) cat("+ adding step\n")
        out <- foreach(i = 1:ncol(NS)) %DO% 
        {
          # Fit clustering model with proposed variable
-         hcPairs <- hc(if(ncol(S) > 0) hcModel else hcModel1,
+         hcPairs <- hc(modelName = if(ncol(S) > 0) hcModel else hcModel1,
                        data = cbind(S,NS[,i])[sub,])
          try(mod <- Mclust(cbind(S,NS[,i]), G = G, 
-                           modelNames = if(ncol(S) > 0) emModels2
-                                                   else emModels1,
+                           modelNames = if(ncol(S) > 0) emModels2 
+                                        else            emModels1,
                            initialization = list(hcPairs = hcPairs,
-                                                 subset = sub)),
+                                                 subset = sub),
+                           verbose = FALSE),
              silent = TRUE)
          # If we get all NA's from above starting hierarchical values use "EEE"
          if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
@@ -158,7 +175,8 @@ clvarselgrbkw <- function(X, G = 1:9,
              try(mod <- Mclust(cbind(S,NS[,i]), G = G, 
                                modelNames = if(ncol(S) > 0) "EEE" else "E",
                                initialization = list(hcPairs = hcPairs,
-                                                     subset = sub)),
+                                                     subset = sub),
+                               verbose = FALSE),
                 silent = TRUE)
            }
          # BICS is the BIC for the clustering model with all variables in S
@@ -168,7 +186,7 @@ clvarselgrbkw <- function(X, G = 1:9,
          # on the other variable(s) in S
          BICreg <- BICreg(y = NS[,i], x = S)
          #         
-         return(c(BICreg, BICNS))
+         return(list(BICreg, BICNS, mod$modelName, mod$G))
        }
        BICreg <- sapply(out, "[[", 1)
        BICNS <- sapply(out, "[[", 2)
@@ -184,21 +202,26 @@ clvarselgrbkw <- function(X, G = 1:9,
            BICS <- BICNS[arg]
            k <- c(colnames(S), colnames(NS)[arg])
            nks <- colnames(NS)[-arg]
-           info <- rbind(info,
-                         c(colnames(NS)[arg], BICS, cdiff[arg], 
-                           "Add", "Accepted"))
+           info <- rbind(info, c(colnames(NS)[arg], BICS, cdiff[arg], 
+                                 "Add", "Accepted", out[[arg]][3:4]))
            S <- cbind(S,NS[,arg])
            NS <- NS[,-arg,drop=FALSE]
            colnames(S) <- k
            colnames(NS) <- nks
          } 
        else
-         { info <- rbind(info,
-                         c(colnames(NS)[arg],BICNS[arg],cdiff[arg],
-                         "Add","Rejected"))
+         { info <- rbind(info, c(colnames(NS)[arg], BICNS[arg], cdiff[arg],
+                                 "Add", "Rejected", out[[arg]][3:4]))
          }
-     }
-   if(verbose) print(info)   
+   }
+   
+   info$BIC <- as.numeric(info$BIC)
+   info$BICdiff <- as.numeric(info$BICdiff)
+
+   if(verbose) 
+     { if(iter > 2) print(info[seq(nrow(info)-1,nrow(info)),c(1,3:5)])
+       else         print(info[nrow(info),c(1,3:5),drop=FALSE]) }
+   
    # Check if the variables in S have changed or not
    check2 <- colnames(S)
    if(is.null(check2))
@@ -220,18 +243,18 @@ clvarselgrbkw <- function(X, G = 1:9,
     warning("Algorithm stopped because maximum number of iterations was reached")
   
   # List the selected variables and the matrix of steps' information
-  info[,2] <- as.numeric(info[,2])
-  info[,3] <- as.numeric(info[,3])
-  colnames(info) <- c("Variable proposed", "BIC", "BIC difference", 
-                      "Type of step", "Decision")
-  # colnames(info) <- c("Variable proposed","BIC of new clustering variables set","BIC difference","Type of step","Decision")
+  info$BIC <- as.numeric(info$BIC)
+  info$BICdiff <- as.numeric(info$BICdiff)
+  # reorder steps.info
+  info <- info[,c(1,4,2,6,7,3,5),drop=FALSE]
+  colnames(info) <- c("Variable proposed", "Type of step",
+                      "BICclust", "Model", "G", "BICdiff", "Decision")
   varnames <- colnames(X)
   subset <- if(is.null(S)) NULL else
                sapply(colnames(S), function(x) which(x == varnames))
 
   out <- list(variables = varnames,
               subset = subset,
-              # sel.var = S, 
               steps.info = info,
               search = "greedy",
               direction = "backward")

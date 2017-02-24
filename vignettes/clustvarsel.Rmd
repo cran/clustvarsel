@@ -1,0 +1,131 @@
+---
+title: "A quick tour of **clustvarsel**"
+author: "Luca Scrucca"
+date: "`r format(Sys.time(), '%d %b %Y')`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{A quick tour of clustvarsel}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align = "center", out.width = "100%",
+               fig.width = 5, fig.height = 5,
+               dev.args = list(pointsize=10),
+               par = TRUE, # needed for setting hook 
+               collapse = TRUE, # collapse input & ouput code in chunks
+               cache = FALSE,
+               warning = FALSE, message = FALSE)
+knit_hooks$set(par = function(before, options, envir)
+  { if(before && options$fig.show != "none") 
+       par(mar=c(4.1,4.1,1.1,1.1), mgp=c(3,1,0), tcl=-0.5)
+})
+```
+       
+## Introduction
+
+The **clustvarsel** package implements variable selection methodology for Gaussian model-based clustering which allows to find the (locally) optimal subset of variables in a dataset that have group/cluster information. 
+A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting **mclust** models. By default the algorithm uses a sequential search, but parallelisation is also available.
+
+This document gives a quick tour of `clustvarsel` (version `r packageVersion("clustvarsel")`) functionalities. It was written in R Markdown, using the [knitr](https://cran.r-project.org/package=knitr) package for production. 
+See `help(package="clustvarsel")` for further details and references provided by `citation("clustvarsel")`.
+
+```{r}
+library(clustvarsel)
+```
+
+## Simulated clustering data example
+
+In this example we simulate a dataset on five dimensions with only the first two variables contain clustering information, the third being highly correlated with the first one, and the remaining features which are simply noise variables.
+
+```{r, echo=-1}
+set.seed(20170224)
+n = 200      # sample size
+pro = 0.5    # mixing proportion
+mu1 = c(0,0) # mean vector for the first cluster
+mu2 = c(3,3) # mean vector for the second cluster
+sigma1 = matrix(c(1,0.5,0.5,1),2,2)       # covar matrix for the first cluster
+sigma2 = matrix(c(1.5,-0.7,-0.7,1.5),2,2) # covar matrix for the second cluster
+X = matrix(0, n, 5, dimnames = list(NULL, paste0("X", 1:5)))
+set.seed(1234) # for replication
+u = runif(n)
+Class = ifelse(u < pro, 1, 2)
+X[u < pro, 1:2]  = MASS::mvrnorm(sum(u < pro), mu = mu1, Sigma = sigma1)
+X[u >= pro, 1:2] = MASS::mvrnorm(sum(u >= pro), mu = mu2, Sigma = sigma2)
+X[, 3] = X[, 1] + rnorm(n)
+X[, 4] = rnorm(n, mean = 1.5, sd = 2)
+X[, 5] = rnorm(n, mean = 2, sd = 1)
+clPairs(X, Class)
+```
+
+```{r}
+out = clustvarsel(X, verbose = TRUE)
+out
+
+out = clustvarsel(X, direction = "backward", verbose = TRUE)
+out
+
+out = clustvarsel(X, search = "headlong", verbose = TRUE)
+out
+```
+
+
+## Simulated no-clustering data example
+
+In this example we simulate a dataset on ten dimensions with no clustering. It is shown that model-based clustering on all the variables yield the wrong conclusion that 2 clusters are present, but after subset selection the Gaussian finite mixture model correctly select a single cluster solution.
+
+```{r, echo=-1}
+set.seed(20170225)
+n = 200
+p = 10
+mu = rep(0,p)
+sigma1 = matrix(c(1,0.5,0.5,1),2,2)
+sigma2 = matrix(c(1.5,-0.7,-0.7,1.5),2,2)
+sigma = Matrix::bdiag(sigma1, sigma2, diag(6))
+set.seed(12345)
+X = MASS::mvrnorm(n, mu, sigma)
+colnames(X) = paste0("X", 1:p)
+pairs(X, gap = 0)
+```
+<br>
+
+Model-based clustering on all the available variables:
+```{r}
+mod = Mclust(X)
+summary(mod$BIC)
+summary(mod)
+plot(mod, what = "classification")
+```
+<br>
+
+Subset selection using forward/backward greedy algorithm:
+```{r}
+(out1 = clustvarsel(X))
+mod1 = Mclust(X[,out1$subset])
+summary(mod1)
+plot(mod1, what = "classification")
+```
+<br>
+Note that the final clustering model shown in the `clustvarsel` output is EII with 2 mixture components. However, this model has been constrained to have $G \ge 2$ components because it must be a clustering model. When the final model is fitted on the selected variables without imposing the constraint on $G$, the BIC correctly indicates a single component model.
+
+Subset selection using backward/forward greedy algorithm:
+```{r}
+(out2 = clustvarsel(X, direction = "backward"))
+mod2 = Mclust(X[,out2$subset])
+summary(mod2)
+plot(mod2, what = "classification")
+```
+<br>
+Although the selected subset of variables is different, the same comments outlined previously apply here too.
+
+--------------------
+
+```{r}
+sessionInfo()
+```
+

@@ -2,10 +2,10 @@
 \alias{clustvarsel}
 \alias{print.clustvarsel}
   
-\title{Variable Selection for Model-Based Clustering}
+\title{Variable Selection for Gaussian Model-Based Clustering}
 
 \description{A function which implements variable selection methodology for model-based clustering which allows to find the (locally) optimal subset of variables in a dataset that have group/cluster information. 
-A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting  Mclust models. By default the algorithm uses a sequential search, but parallelisation is also available.}
+A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting  \code{\link[mclust]{mclust}} models. By default the algorithm uses a sequential search, but parallelisation is also available.}
 
 \usage{
 clustvarsel(data, 
@@ -23,7 +23,8 @@ clustvarsel(data,
             BIC.upper = 0, 
             BIC.lower = -10, 
             itermax = 100, 
-            parallel = FALSE)
+            parallel = FALSE,
+            verbose = interactive())
 }
                         
 \arguments{
@@ -58,14 +59,21 @@ clustvarsel(data,
 
 \item{itermax}{An integer value giving the maximum number of iterations (of addition and removal steps) the selected algorithm is allowed to run for.}
 
-\item{parallel}{This argument allows to specify if the selected \code{"greedy"} algorithm should be run sequentially or in parallel. The possible values are: 
+\item{parallel}{An optional argument which allows to specify if the selected \code{"greedy"} algorithm should be run sequentially or in parallel. 
+
+For a single machine with multiple cores, possible values are: 
 \itemize{
   \item a logical value specifying if parallel computing should be used (\code{TRUE}) or not (\code{FALSE}, default) for running the algorithm;
-  \item a numerical value which gives the number of cores to employ. By default, this is obtained from the function \code{\link[parallel]{detectCores}}; 
+  \item  a numerical value which gives the number of cores to employ. By default, this is obtained from the function \code{\link[parallel]{detectCores}}; 
   \item a character string specifying the type of parallelisation to use. This depends on system OS: on Windows OS only \code{"snow"} type functionality is available, while on Unix/Linux/Mac OSX both \code{"snow"} and \code{"multicore"} (default) functionalities are available.
-  }
-Clearly, also the last two options imply that the search is performed in parallel.
 }
+In all the cases described above, at the end of the search the cluster is automatically stopped by shutting down the workers.
+
+If a cluster of multiple machines is available, the algorithm can be run in parallel using all, or a subset of, the cores available to the machines belonging to the cluster. However, this option requires more work from the user, who needs to set up and register a parallel back end. 
+In this case the cluster must be explicitely stopped with \code{\link[parallel]{stopCluster}}.
+}
+
+\item{verbose}{A logical indicating if info must be provided at each step of the algorithm. By default is set to \code{TRUE} during interactive sessions, and \code{FALSE} otherwise.}
 }
 
 \details{
