@@ -70,7 +70,7 @@ For a single machine with multiple cores, possible values are:
 In all the cases described above, at the end of the search the cluster is automatically stopped by shutting down the workers.
 
 If a cluster of multiple machines is available, the algorithm can be run in parallel using all, or a subset of, the cores available to the machines belonging to the cluster. However, this option requires more work from the user, who needs to set up and register a parallel back end. 
-In this case the cluster must be explicitely stopped with \code{\link[parallel]{stopCluster}}.
+In this case, the cluster must be explicitly stopped with \code{\link[parallel]{stopCluster}}.
 }
 
 \item{verbose}{A logical indicating if info must be provided at each step of the algorithm. By default is set to \code{TRUE} during interactive sessions, and \code{FALSE} otherwise.}

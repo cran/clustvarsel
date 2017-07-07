@@ -21,7 +21,7 @@ clvarselgrfwd(X, G = 1:9,
               samp = FALSE, sampsize = 2000, 
               hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.diff = 0, itermax = 100, 
-              parallel = FALSE, verbose = FALSE)
+              parallel = FALSE, verbose = interactive())
 
 clvarselgrbkw(X, G = 1:9, 
               emModels1 = c("E","V"), 
@@ -29,7 +29,7 @@ clvarselgrbkw(X, G = 1:9,
               samp = FALSE, sampsize = 2000, 
               hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.diff = 0, itermax = 100,
-              parallel = FALSE, verbose = FALSE)
+              parallel = FALSE, verbose = interactive())
 
 clvarselhlfwd(X, G = 1:9,
               emModels1 = c("E","V"), 
@@ -38,7 +38,7 @@ clvarselhlfwd(X, G = 1:9,
               hcModel = "VVV",
               allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.upper = 0, BIC.lower = -10,
-              itermax = 100, verbose = FALSE)
+              itermax = 100, verbose = interactive())
 
 clvarselhlbkw(X, G = 1:9,
               emModels1 = c("E","V"), 
@@ -47,7 +47,7 @@ clvarselhlbkw(X, G = 1:9,
               hcModel = "VVV",
               allow.EEE = TRUE, forcetwo = TRUE, 
               BIC.upper = 0, BIC.lower = -10,
-              itermax = 100, verbose = FALSE)
+              itermax = 100, verbose = interactive())
 
 BICreg(x, y)
 

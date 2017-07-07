@@ -9,7 +9,8 @@ clvarselhlbkw <- function(X, G = 1:9,
                           hcModel = "VVV",
                           allow.EEE = TRUE, forcetwo = TRUE, 
                           BIC.upper = 0, BIC.lower = -10,
-                          itermax = 100, verbose = FALSE)
+                          itermax = 100, 
+                          verbose = interactive())
 {
   warning("Headlong backward search is not currently available! Please use another type of search and/or direction.", immediate. = TRUE)
   invisible(NULL)

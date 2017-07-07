@@ -28,8 +28,12 @@ clustvarsel <- function(data, G = 1:9,
   # Check whether there are variable names to identify selected variables
   if(is.null(colnames(X))) 
     colnames(X) <- paste("X", 1:ncol(X), sep = "")
-  search <- match.arg(search)
   mc$data <- NULL
+  
+  # search    <- match.arg(search, choices = eval(formals(clustvarsel)$search))
+  # direction <- match.arg(direction, choices = eval(formals(clustvarsel)$direction))
+  search    <- match.arg(search, choices = c("greedy", "headlong"))
+  direction <- match.arg(direction, choices = c("forward", "backward"))
   
   if(search == "greedy" & direction == "forward")
     { mc[[1]] <- as.name("clvarselgrfwd")

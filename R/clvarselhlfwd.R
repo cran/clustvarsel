@@ -9,7 +9,8 @@ clvarselhlfwd <- function(X, G = 1:9,
                           hcModel = "VVV",
                           allow.EEE = TRUE, forcetwo = TRUE, 
                           BIC.upper = 0, BIC.lower = -10,
-                          itermax = 100, verbose = FALSE)
+                          itermax = 100, 
+                          verbose = interactive())
 {
   X <- as.matrix(X)
   n <- nrow(X) # number of rows=number of observations

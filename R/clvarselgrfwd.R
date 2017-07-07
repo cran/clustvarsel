@@ -8,7 +8,8 @@ clvarselgrfwd <- function(X, G = 1:9,
                           samp = FALSE, sampsize = 2000, 
                           hcModel = "VVV", allow.EEE = TRUE, forcetwo = TRUE, 
                           BIC.diff = 0, itermax = 100, 
-                          parallel = FALSE, verbose = FALSE)
+                          parallel = FALSE, 
+                          verbose = interactive())
 {
   X <- as.matrix(X)
   n <- nrow(X) # number of rows = number of observations
@@ -421,6 +422,3 @@ clvarselgrfwd <- function(X, G = 1:9,
   class(out) <- "clustvarsel"  
   return(out)
 }
-
-
-
