@@ -129,8 +129,7 @@ Badsberg, J. H. (1992) Model search in contingency tables by CoCo. In Dodge, Y. 
 
 Maugis, C., Celeux, G., Martin-Magniette M. (2009) Variable Selection for Clustering With Gaussian Mixture Models. \emph{Biometrics}, 65(3), 701-709.
 
-Scrucca, L. and Raftery, A. E. (2015) clustvarsel: A Package Implementing Variable Selection for Model-based Clustering in R. Submitted to \emph{Journal of Statistical Software}. 
-Pre-print available at \url{http://arxiv.org/abs/1411.0606}.
+Scrucca, L. and Raftery, A. E. (2018) clustvarsel: A Package Implementing Variable Selection for Gaussian Model-based Clustering in R. \emph{Journal of Statistical Software}, 84(1), pp. 1-28.
 }
 
 \author{N. Dean, A. E. Raftery, and L. Scrucca.}
@@ -142,32 +141,32 @@ Pre-print available at \url{http://arxiv.org/abs/1411.0606}.
 # clustering in the rest. Clusters have mixing proportion pro, means 
 # mu1 and mu2 and variances sigma1 and sigma2
 require(MASS)
-n = 200
-pro = 0.5
-mu1 = c(0,0)
-mu2 = c(3,3)
-sigma1 = matrix(c(1,0.5,0.5,1),2,2,byrow=TRUE)
-sigma2 = matrix(c(1.5,-0.7,-0.7,1.5),2,2,byrow=TRUE)
-X = matrix(0, n, 5)
-colnames(X) = paste("X", 1:ncol(X), sep ="")
+n <- 200
+pro <- 0.5
+mu1 <- c(0,0)
+mu2 <- c(3,3)
+sigma1 <- matrix(c(1,0.5,0.5,1),2,2,byrow=TRUE)
+sigma2 <- matrix(c(1.5,-0.7,-0.7,1.5),2,2,byrow=TRUE)
+X <- matrix(0, n, 5)
+colnames(X) <- paste("X", 1:ncol(X), sep ="")
 # generate the clustering variables
-u = runif(n)
-Class = ifelse(u < pro, 1, 2)
-X[u < pro, 1:2]  = mvrnorm(sum(u < pro), mu = mu1, Sigma = sigma1)
-X[u >= pro, 1:2] = mvrnorm(sum(u >= pro), mu = mu2, Sigma = sigma2)
+u <- runif(n)
+Class <- ifelse(u < pro, 1, 2)
+X[u < pro, 1:2]  <- mvrnorm(sum(u < pro), mu = mu1, Sigma = sigma1)
+X[u >= pro, 1:2] <- mvrnorm(sum(u >= pro), mu = mu2, Sigma = sigma2)
 # generate the non-clustering variables
-X[,3] = X[,1] + rnorm(n)
-X[,4] = rnorm(n, mean = 1.5, sd = 2)
-X[,5] = rnorm(n, mean = 2, sd = 1)
+X[,3] <- X[,1] + rnorm(n)
+X[,4] <- rnorm(n, mean = 1.5, sd = 2)
+X[,5] <- rnorm(n, mean = 2, sd = 1)
 # plot the data
 clPairs(X, Class, gap = 0)
 
 # sequential forward greedy search (default)
-out = clustvarsel(X, G = 1:5)
+out <- clustvarsel(X, G = 1:5)
 out
 # look at the clustering produced by the selected variables
-Xs = X[,out$subset]
-mod = Mclust(Xs, G = 1:5)
+Xs <- X[,out$subset]
+mod <- Mclust(Xs, G = 1:5)
 summary(mod)
 table(Class, mod$classification)
 

@@ -1,20 +1,17 @@
-citHeader("To cite 'clustvarsel' R package in publications, please use:")
-
-citEntry(entry = "Article",
-  title        = "{clustvarsel}: A Package Implementing Variable Selection for Model-based Clustering in {R}",
-  author       = personList(person(given="Luca", family="Scrucca"), 
-                            person(given=c("Adrian", "E."), family="Raftery")),
-  journal      = "(submitted to) Journal of Statistical Software",
-  year         = "2015",
-  volume       = "??",
-  number       = "?",
-  pages        = "??--??",
-  url          = "http://www.jstatsoft.org/??/??/",
-  #
-  textVersion  =
-  paste("Luca Scrucca and Adrian E. Raftery (2015).",
-        "clustvarsel: A Package Implementing Variable Selection for Model-based Clustering in R",
-        "(submitted) Journal of Statistical Software, ??(?), ??-??.",
-        "URL http://www.jstatsoft.org/??/??/.")
+bibentry(bibtype = "Article",
+  title        = "{clustvarsel}: A Package Implementing Variable Selection for Gaussian Model-Based Clustering in {R}",
+  author       = c(person(given = "Luca",
+                          family = "Scrucca",
+                          email = "luca.scrucca@unipg.it"),
+                   person(given = c("Adrian", "E."),
+                          family = "Raftery",
+                          email = "raftery@u.washington.edu")),
+  journal      = "Journal of Statistical Software",
+  year         = "2018",
+  volume       = "84",
+  number       = "1",
+  pages        = "1--28",
+  doi          = "10.18637/jss.v084.i01",
+  header       = "To cite clustvarsel in publications use:"
 )
 

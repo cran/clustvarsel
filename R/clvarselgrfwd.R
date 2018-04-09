@@ -162,13 +162,13 @@ clvarselgrfwd <- function(X, G = 1:9,
   if(verbose) print(info[2,c(1,3:5),drop=FALSE])
 
   criterion <- 1
-  iter <- 0
+  iter <- 2
   while((criterion == 1) & (iter < itermax))
   {
     iter <- iter+1
     check1 <- colnames(S)
     
-    if(verbose) cat(paste("iter", iter+2, "\n"))
+    if(verbose) cat(paste("iter", iter, "\n"))
     
     # Adding step
     if(verbose) cat("+ adding step\n")
@@ -190,13 +190,15 @@ clvarselgrfwd <- function(X, G = 1:9,
             colnames(S) <- colnames(X)[arg]
             NS <- as.matrix(X[,-arg])
             colnames(NS) <- colnames(X)[-arg]
-            info <- rbind(info, c(colnames(S),BICS,maxdiff[arg],"Add","Accepted"))
+            info <- rbind(info, c(colnames(S), BICS, maxdiff[arg],
+                                  "Add","Accepted", NA, NA))
           } 
         else
           { # if the difference is not > BIC.diff no clustering variables exist
             BICS <- NA
             info <- rbind(info,
-                          c(colnames(X)[arg],BICS,maxdiff[arg],"Add","Rejected"))
+                          c(colnames(X)[arg], BICS, maxdiff[arg],
+                            "Add", "Rejected", NA, NA))
           }
       }
     else
@@ -265,20 +267,20 @@ clvarselgrfwd <- function(X, G = 1:9,
               }
           }
       }
-    # Removal Step for the special case where S contains only a single variable
     if(verbose) cat("- removing step\n")
+    # Removal Step for the special case where S contains only a single variable
     if(ncol(S) == 1)
       { 
         cdiff <- 0
-        oneBIC <- NA
-        try(oneBIC <- Mclust(as.matrix(S), G = 1, modelNames = emModels1,
+        oneMod <- NA
+        try(oneMod <- Mclust(as.matrix(S), G = 1, modelNames = emModels1,
                              initialization = list(hcPairs = hc(hcModel1, data = S[sub,]), 
                                                    subset = sub),
-                             verbose = FALSE)$BIC[1],
+                             verbose = FALSE),
             silent = TRUE)
         # Difference between maximum BIC for clustering and BIC 
         # for no clustering
-        cdiff <- c(BICS - oneBIC)
+        cdiff <- c(BICS - oneMod$bic)
         if(is.na(cdiff)) cdiff <- 0
         # Check if difference is less than BIC.diff
         if(cdiff <= BIC.diff)
@@ -294,8 +296,10 @@ clvarselgrfwd <- function(X, G = 1:9,
           } 
         else
           { # Otherwise leave S and BICS alone
-            info <- rbind(info, c(colnames(S), info[nrow(info),2], cdiff, 
-                          "Remove", "Rejected", info[nrow(info),3:4]))
+            info <- rbind(info, c(colnames(S), 
+                          info[nrow(info),2], cdiff, 
+                          "Remove", "Rejected", 
+                          unlist(info[nrow(info),c(6,7)])))
           }
       } 
     else

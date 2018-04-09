@@ -1,3 +1,8 @@
+Version 2.3.2 (2018-04)
+  o Package version accompanying JSS paper. 
+  o Bug fixes in the extreme case no clustering variable is selected using
+    the greedy forward/backward search.
+
 Version 2.3.1 (2017-06)
   o Fix bug on a "if" executed with a condition that has length greater than 1.
 
@@ -11,33 +16,33 @@ Version 2.3 (2017-01)
   o Add "A quick tour of clustvarsel" vignette.
   
 Version 2.2 (2015-11)
-  o reformat summary output from clustvarsel.
-  o add and update references in main help page.
+  o Reformat summary output from clustvarsel.
+  o Add and update references in main help page.
 
 Version 2.1 (2014-10)
-  o version associated with JSS paper submission.
-  o add explicitly stop of clusters if parallel is used.
-  o specifically included in the hc() function call the argument name 'data = ...' 
+  o Version associated with JSS paper submission.
+  o Add explicitly stop of clusters if parallel is used.
+  o Specifically included in the hc() function call the argument name 'data = ...' 
     so that works with both mclust version 4.4 and upper.
-  o other bug fixes and improvements.
+  o Other bug fixes and improvements.
 
 Version 2.0 (2013-10)
-  o partial rewriting of the package.
+  o Partial rewriting of the package.
   o "greedy" search has option for forward and backward direction.
   o "headlong" search has option only for forward direction in this release.
   o G is not the maximum number of clusters but it must be a vector of number
     of cluster to look for.
-  o no separate code for samp and nosamp version of each search algorithm.
-  o inclusion of argument hcModel to control the initial hierarchical 
+  o No separate code for samp and nosamp version of each search algorithm.
+  o Inclusion of argument hcModel to control the initial hierarchical 
     clustering.
-  o include subset selection in the regression of proposed variable on the 
+  o Include subset selection in the regression of proposed variable on the 
     variables already included.
   o "greedy" search algorithms can be executed either sequentially or using 
     the parallel computing facilities available in R.
-  o this version of the package requires R (>= 3.0.0) and mclust (>= 4.0).
+  o This version of the package requires R (>= 3.0.0) and mclust (>= 4.0).
     
 Version 1.3 (2009-08)
-  o last version on CRAN available for R-2.14.x and mclust version 3.5
+  o Last version on CRAN available for R-2.14.x and mclust version 3.5
 
  
 
