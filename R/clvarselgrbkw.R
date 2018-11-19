@@ -149,9 +149,18 @@ clvarselgrbkw <- function(X, G = 1:9,
        colnames(S) <- k
      } 
    else
-     { info <- rbind(info, c(colnames(S)[arg], 
-                             (BICnotclust-BICreg)[arg], cdiff[arg],
-                             "Remove", "Rejected", out[[arg]][3:4]))
+     { if(nrow(info) > 0)
+         info <- rbind(info, 
+                       c(colnames(S)[arg], 
+                         (BICnotclust-BICreg)[arg], cdiff[arg],
+                         "Remove", "Rejected", out[[arg]][3:4]))
+       else
+         info <- data.frame(Var = colnames(S)[arg], 
+                            BIC = BICS, BICdiff = cdiff[arg], 
+                            Step = "Remove", Decision = "Rejected",
+                            Model = out[[arg]][[3]],
+                            G = out[[arg]][[4]],
+                            stringsAsFactors = FALSE)
      }
 
    if(ncol(NS) > 2)

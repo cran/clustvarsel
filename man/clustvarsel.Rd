@@ -24,6 +24,7 @@ clustvarsel(data,
             BIC.lower = -10, 
             itermax = 100, 
             parallel = FALSE,
+            fit = TRUE,
             verbose = interactive())
 }
                         
@@ -73,6 +74,8 @@ If a cluster of multiple machines is available, the algorithm can be run in para
 In this case, the cluster must be explicitly stopped with \code{\link[parallel]{stopCluster}}.
 }
 
+\item{fit}{A logical specifying if the model with the selected "best" subset should be fitted at the end of the procedure. By default is set to \code{TRUE}.}
+
 \item{verbose}{A logical indicating if info must be provided at each step of the algorithm. By default is set to \code{TRUE} during interactive sessions, and \code{FALSE} otherwise.}
 }
 
@@ -118,6 +121,8 @@ steps run in the algorithm can be changed by using the \code{\link[mclust]{mclus
 \item{search}{A string specifying the type of search employed.}
 
 \item{direction}{A string specifying the direction of search employed.}
+
+\item{model}{If input argument \code{fit = TRUE}, a \code{'Mclust'} object containing the final model fitted on the "best" subset selected.}
 }
 
 
@@ -164,11 +169,8 @@ clPairs(X, Class, gap = 0)
 # sequential forward greedy search (default)
 out <- clustvarsel(X, G = 1:5)
 out
-# look at the clustering produced by the selected variables
-Xs <- X[,out$subset]
-mod <- Mclust(Xs, G = 1:5)
-summary(mod)
-table(Class, mod$classification)
+summary(out$model)
+table(Class, out$mod$classification)
 
 \dontrun{
 # sequential backward greedy search

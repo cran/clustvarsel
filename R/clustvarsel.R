@@ -13,6 +13,7 @@ clustvarsel <- function(data, G = 1:9,
                         BIC.lower = -10, 
                         itermax = 100, 
                         parallel = FALSE,
+                        fit = TRUE,
                         verbose = interactive())
 {
 
@@ -38,32 +39,41 @@ clustvarsel <- function(data, G = 1:9,
   if(search == "greedy" & direction == "forward")
     { mc[[1]] <- as.name("clvarselgrfwd")
       mc$X <- X
-      mc$search <- mc$direction <- mc$BIC.upper <- mc$BIC.lower <- NULL
+      mc[c("search", "direction", "BIC.upper", "BIC.lower", "fit")] <- NULL
       out <- eval(mc, parent.frame())
     }
   else if(search == "greedy" & direction == "backward")
     { mc[[1]] <- as.name("clvarselgrbkw")
       mc$X <- X
-      mc$search <- mc$direction <- mc$forcetwo <- mc$BIC.upper <- mc$BIC.lower <- NULL
+      mc[c("search", "direction", "forcetwo", "BIC.upper", "BIC.lower", "fit")] <- NULL
       out <- eval(mc, parent.frame())
     }
   else if(search == "headlong" & direction == "forward")
     { mc[[1]] <- as.name("clvarselhlfwd")
       mc$X <- X
-      mc$search <- mc$direction <- mc$BIC.diff <- mc$parallel <- NULL
+      mc[c("search", "direction", "BIC.diff", "parallel", "fit")] <- NULL
       out <- eval(mc, parent.frame())
     }   
   else if(search == "headlong" & direction == "backward")
     { mc[[1]] <- as.name("clvarselhlbkw")
       mc$X <- X
-      mc$search <- mc$direction <- mc$forcetwo <- mc$BIC.diff <- mc$parallel <- NULL
+            mc[c("search", "direction",  "forcetwo", 
+                 "BIC.diff", "parallel", "fit")]  <- NULL
       out <- eval(mc, parent.frame())
     }
   else stop("selected search and/or direction not available")
   
-  if(!is.null(out))
-    { class(out) <- "clustvarsel" }
-  
+  if(!is.null(out) & fit)
+  { 
+    if(verbose)
+      cat(paste("final iter\n* fitting model on selected subset\n"))
+    out$model <- Mclust(X[,out$subset,drop=FALSE], 
+                        G = G, 
+                        modelNames = if(length(out$subset) > 1) emModels2 
+                                     else emModels1,
+                        verbose = FALSE)
+  }
+  class(out) <- "clustvarsel"
   return(out)
 }
 

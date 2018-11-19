@@ -1,3 +1,8 @@
+Version 2.3.3 (2018-11)
+  o Added the final estimated model to the 'clustvarsel' object. 
+  o Solved a bug that stop execution in the greedy-backward search when no 
+    variables could be removed. 
+
 Version 2.3.2 (2018-04)
   o Package version accompanying JSS paper. 
   o Bug fixes in the extreme case no clustering variable is selected using

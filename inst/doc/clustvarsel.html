@@ -12,7 +12,7 @@
 
 <meta name="author" content="Luca Scrucca" />
 
-<meta name="date" content="2018-04-09" />
+<meta name="date" content="2018-11-19" />
 
 <title>A quick tour of clustvarsel</title>
 
@@ -214,7 +214,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">A quick tour of <strong>clustvarsel</strong></h1>
 <h4 class="author"><em>Luca Scrucca</em></h4>
-<h4 class="date"><em>09 Apr 2018</em></h4>
+<h4 class="date"><em>19 Nov 2018</em></h4>
 
 
 <div id="TOC">
@@ -228,7 +228,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>The <strong>clustvarsel</strong> package implements variable selection methodology for Gaussian model-based clustering which allows to find the (locally) optimal subset of variables in a dataset that have group/cluster information. A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting <strong>mclust</strong> models. By default the algorithm uses a sequential search, but parallelisation is also available.</p>
-<p>This document gives a quick tour of <code>clustvarsel</code> (version 2.3.2) functionalities. It was written in R Markdown, using the <a href="https://cran.r-project.org/package=knitr">knitr</a> package for production. See <code>help(package=&quot;clustvarsel&quot;)</code> for further details and references provided by <code>citation(&quot;clustvarsel&quot;)</code>.</p>
+<p>This document gives a quick tour of <strong>clustvarsel</strong> (version 2.3.3) functionalities. It was written in R Markdown, using the <a href="https://cran.r-project.org/package=knitr">knitr</a> package for production. See <code>help(package=&quot;clustvarsel&quot;)</code> for further details and references provided by <code>citation(&quot;clustvarsel&quot;)</code>.</p>
 <pre><code>library(clustvarsel)</code></pre>
 </div>
 <div id="simulated-clustering-data-example" class="section level2">
@@ -249,7 +249,7 @@ X[u &gt;= pro, 1:2] &lt;- MASS::mvrnorm(sum(u &gt;= pro), mu = mu2, Sigma = sigm
 X[, 3] &lt;- X[, 1] + rnorm(n)
 X[, 4] &lt;- rnorm(n, mean = 1.5, sd = 2)
 X[, 5] &lt;- rnorm(n, mean = 2, sd = 1)</code></pre>
-<pre><code>out &lt;- clustvarsel(X, verbose = TRUE)
+<pre><code>out &lt;- clustvarsel(X)
 ## iter 1
 ## + adding step
 ##   Var  BICdiff Step Decision
@@ -264,6 +264,9 @@ X[, 5] &lt;- rnorm(n, mean = 2, sd = 1)</code></pre>
 ##   Var   BICdiff   Step Decision
 ## 3  X3 -14.91130    Add Rejected
 ## 4  X1  85.19104 Remove Rejected
+## final iter
+## * fitting model on selected subset
+
 out
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
@@ -276,8 +279,22 @@ out
 ##                 X3          Add -2047.7064   EEV 2 -14.91130 Rejected
 ##                 X1       Remove  -822.6355     E 2  85.19104 Rejected
 ## 
-## Selected subset: X2, X1</code></pre>
-<pre><code>out &lt;- clustvarsel(X, direction = &quot;backward&quot;, verbose = TRUE)
+## Selected subset: X2, X1
+
+summary(out$model)
+## ---------------------------------------------------- 
+## Gaussian finite mixture model fitted by EM algorithm 
+## ---------------------------------------------------- 
+## 
+## Mclust VEV (ellipsoidal, equal shape) model with 2 components: 
+## 
+##  log.likelihood   n df       BIC       ICL
+##       -714.9288 200 10 -1482.841 -1493.898
+## 
+## Clustering table:
+##   1   2 
+##  99 101 </code></pre>
+<pre><code>out &lt;- clustvarsel(X, direction = &quot;backward&quot;, fit = FALSE)
 ## iter 1 
 ## - removing step
 ##   Var   BICdiff   Step Decision
@@ -298,6 +315,7 @@ out
 ##   Var   BICdiff   Step Decision
 ## 5  X1  95.55735 Remove Rejected
 ## 6  X3 -14.91130    Add Rejected
+
 out
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
@@ -313,7 +331,7 @@ out
 ##                 X3          Add -2047.7064   EEV 2 -14.91130 Rejected
 ## 
 ## Selected subset: X1, X2</code></pre>
-<pre><code>out &lt;- clustvarsel(X, search = &quot;headlong&quot;, verbose = TRUE)
+<pre><code>out &lt;- clustvarsel(X, search = &quot;headlong&quot;)
 ## iter 1
 ## + adding step
 ##   Var  BICdiff Step Decision
@@ -328,6 +346,9 @@ out
 ##   Var  BICdiff   Step Decision
 ## 3  X3 -14.9113    Add Rejected
 ## 4  X1  85.1953 Remove Rejected
+## final iter
+## * fitting model on selected subset
+
 out
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
@@ -355,7 +376,8 @@ set.seed(12345)
 X &lt;- MASS::mvrnorm(n, mu, sigma)
 colnames(X) &lt;- paste0(&quot;X&quot;, 1:p)</code></pre>
 <p>Model-based clustering on all the available variables:</p>
-<pre><code>mod &lt;- Mclust(X)
+<pre><code>library(mclust)
+mod &lt;- Mclust(X)
 summary(mod$BIC)
 ## Best BIC values:
 ##              EII,2       VII,2       EII,3
@@ -375,7 +397,7 @@ summary(mod)
 ##   1   2 
 ##  90 110</code></pre>
 <p>Subset selection using forward/backward greedy algorithm:</p>
-<pre><code>(out1 &lt;- clustvarsel(X))
+<pre><code>(out1 &lt;- clustvarsel(X, verbose = FALSE))
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
 ## Stepwise (forward/backward) greedy search
@@ -395,9 +417,12 @@ summary(mod)
 ##                 X9          Add -4081.9212   EII 2 -2.0296117 Rejected
 ##                 X8       Remove -2942.2744   EII 2  0.1104619 Rejected
 ## 
-## Selected subset: X3, X7, X10, X6, X2, X8</code></pre>
-<pre><code>mod1 &lt;- Mclust(X[,out1$subset])
-summary(mod1)
+## Selected subset: X3, X7, X10, X6, X2, X8
+
+summary(out1$model)
+# or
+# mod1 &lt;- Mclust(X[,out1$subset])
+# summary(mod1)
 ## ----------------------------------------------------
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ----------------------------------------------------
@@ -410,9 +435,9 @@ summary(mod1)
 ## Clustering table:
 ##   1 
 ## 200</code></pre>
-<p>Note that the final clustering model shown in the <code>clustvarsel</code> output is EII with 2 mixture components. However, this model has been constrained to have <span class="math inline">\(G \ge 2\)</span> components because it must be a clustering model. When the final model is fitted on the selected variables without imposing the constraint on <span class="math inline">\(G\)</span>, the BIC correctly indicates a single component model.</p>
+<p>Note that the final clustering model shown in the <code>clustvarsel()</code> output is EII with 2 mixture components. However, this model has been constrained to have G <span class="math inline">\(\ge\)</span> 2 components because it must be a clustering model. When the final model is fitted on the selected variables without imposing the constraint on G, the BIC correctly indicates a single component model.</p>
 <p>Subset selection using backward/forward greedy algorithm:</p>
-<pre><code>(out2 &lt;- clustvarsel(X, direction = &quot;backward&quot;))
+<pre><code>(out2 &lt;- clustvarsel(X, direction = &quot;backward&quot;, verbose = FALSE))
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
 ## Stepwise (backward/forward) greedy search
@@ -430,9 +455,9 @@ summary(mod1)
 ##                 X5       Remove -2308.785   EII 2   1.0712786 Rejected
 ##                 X8          Add -3453.786   EII 2  -0.4288443 Rejected
 ## 
-## Selected subset: X1, X5, X6, X9, X10</code></pre>
-<pre><code>mod2 &lt;- Mclust(X[,out2$subset])
-summary(mod2)
+## Selected subset: X1, X5, X6, X9, X10
+
+summary(out2$model)
 ## ----------------------------------------------------
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ----------------------------------------------------
@@ -445,7 +470,7 @@ summary(mod2)
 ## Clustering table:
 ##   1 
 ## 200</code></pre>
-<p>Although the selected subset of variables is different, the same comments outlined previously apply here too.</p>
+<p>Although the selected subset of variables is different from that obtained using forward greedy search, the same comments outlined previously apply here too.</p>
 </div>
 
 

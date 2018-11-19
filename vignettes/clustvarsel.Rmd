@@ -31,7 +31,7 @@ knit_hooks$set(par = function(before, options, envir)
 The **clustvarsel** package implements variable selection methodology for Gaussian model-based clustering which allows to find the (locally) optimal subset of variables in a dataset that have group/cluster information. 
 A greedy or headlong search can be used, either in a forward-backward or backward-forward direction, with or without sub-sampling at the hierarchical clustering stage for starting **mclust** models. By default the algorithm uses a sequential search, but parallelisation is also available.
 
-This document gives a quick tour of `clustvarsel` (version `r packageVersion("clustvarsel")`) functionalities. It was written in R Markdown, using the [knitr](https://cran.r-project.org/package=knitr) package for production. 
+This document gives a quick tour of **clustvarsel** (version `r packageVersion("clustvarsel")`) functionalities. It was written in R Markdown, using the [knitr](https://cran.r-project.org/package=knitr) package for production. 
 See `help(package="clustvarsel")` for further details and references provided by `citation("clustvarsel")`.
 
 ```
@@ -61,7 +61,7 @@ X[, 5] <- rnorm(n, mean = 2, sd = 1)
 ```
 
 ```
-out <- clustvarsel(X, verbose = TRUE)
+out <- clustvarsel(X)
 ## iter 1
 ## + adding step
 ##   Var  BICdiff Step Decision
@@ -76,6 +76,9 @@ out <- clustvarsel(X, verbose = TRUE)
 ##   Var   BICdiff   Step Decision
 ## 3  X3 -14.91130    Add Rejected
 ## 4  X1  85.19104 Remove Rejected
+## final iter
+## * fitting model on selected subset
+
 out
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
@@ -89,10 +92,24 @@ out
 ##                 X1       Remove  -822.6355     E 2  85.19104 Rejected
 ## 
 ## Selected subset: X2, X1
+
+summary(out$model)
+## ---------------------------------------------------- 
+## Gaussian finite mixture model fitted by EM algorithm 
+## ---------------------------------------------------- 
+## 
+## Mclust VEV (ellipsoidal, equal shape) model with 2 components: 
+## 
+##  log.likelihood   n df       BIC       ICL
+##       -714.9288 200 10 -1482.841 -1493.898
+## 
+## Clustering table:
+##   1   2 
+##  99 101 
 ```
 
 ```
-out <- clustvarsel(X, direction = "backward", verbose = TRUE)
+out <- clustvarsel(X, direction = "backward", fit = FALSE)
 ## iter 1 
 ## - removing step
 ##   Var   BICdiff   Step Decision
@@ -113,6 +130,7 @@ out <- clustvarsel(X, direction = "backward", verbose = TRUE)
 ##   Var   BICdiff   Step Decision
 ## 5  X1  95.55735 Remove Rejected
 ## 6  X3 -14.91130    Add Rejected
+
 out
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
@@ -131,7 +149,7 @@ out
 ```
 
 ```
-out <- clustvarsel(X, search = "headlong", verbose = TRUE)
+out <- clustvarsel(X, search = "headlong")
 ## iter 1
 ## + adding step
 ##   Var  BICdiff Step Decision
@@ -146,6 +164,9 @@ out <- clustvarsel(X, search = "headlong", verbose = TRUE)
 ##   Var  BICdiff   Step Decision
 ## 3  X3 -14.9113    Add Rejected
 ## 4  X1  85.1953 Remove Rejected
+## final iter
+## * fitting model on selected subset
+
 out
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
@@ -179,6 +200,7 @@ colnames(X) <- paste0("X", 1:p)
 
 Model-based clustering on all the available variables:
 ```
+library(mclust)
 mod <- Mclust(X)
 summary(mod$BIC)
 ## Best BIC values:
@@ -202,7 +224,7 @@ summary(mod)
 
 Subset selection using forward/backward greedy algorithm:
 ```
-(out1 <- clustvarsel(X))
+(out1 <- clustvarsel(X, verbose = FALSE))
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
 ## Stepwise (forward/backward) greedy search
@@ -223,11 +245,11 @@ Subset selection using forward/backward greedy algorithm:
 ##                 X8       Remove -2942.2744   EII 2  0.1104619 Rejected
 ## 
 ## Selected subset: X3, X7, X10, X6, X2, X8
-```
 
-```
-mod1 <- Mclust(X[,out1$subset])
-summary(mod1)
+summary(out1$model)
+# or
+# mod1 <- Mclust(X[,out1$subset])
+# summary(mod1)
 ## ----------------------------------------------------
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ----------------------------------------------------
@@ -242,11 +264,11 @@ summary(mod1)
 ## 200
 ```
 
-Note that the final clustering model shown in the `clustvarsel` output is EII with 2 mixture components. However, this model has been constrained to have $G \ge 2$ components because it must be a clustering model. When the final model is fitted on the selected variables without imposing the constraint on $G$, the BIC correctly indicates a single component model.
+Note that the final clustering model shown in the `clustvarsel()` output is EII with 2 mixture components. However, this model has been constrained to have G $\ge$ 2 components because it must be a clustering model. When the final model is fitted on the selected variables without imposing the constraint on G, the BIC correctly indicates a single component model.
 
 Subset selection using backward/forward greedy algorithm:
 ```
-(out2 <- clustvarsel(X, direction = "backward"))
+(out2 <- clustvarsel(X, direction = "backward", verbose = FALSE))
 ## ------------------------------------------------------ 
 ## Variable selection for Gaussian model-based clustering
 ## Stepwise (backward/forward) greedy search
@@ -265,11 +287,8 @@ Subset selection using backward/forward greedy algorithm:
 ##                 X8          Add -3453.786   EII 2  -0.4288443 Rejected
 ## 
 ## Selected subset: X1, X5, X6, X9, X10
-```
 
-```
-mod2 <- Mclust(X[,out2$subset])
-summary(mod2)
+summary(out2$model)
 ## ----------------------------------------------------
 ## Gaussian finite mixture model fitted by EM algorithm 
 ## ----------------------------------------------------
@@ -283,4 +302,4 @@ summary(mod2)
 ##   1 
 ## 200
 ```
-Although the selected subset of variables is different, the same comments outlined previously apply here too.
+Although the selected subset of variables is different from that obtained using forward greedy search, the same comments outlined previously apply here too.
