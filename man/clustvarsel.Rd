@@ -1,6 +1,5 @@
 \name{clustvarsel}
 \alias{clustvarsel}
-\alias{print.clustvarsel}
   
 \title{Variable Selection for Gaussian Model-Based Clustering}
 
@@ -108,13 +107,14 @@ steps run in the algorithm can be changed by using the \code{\link[mclust]{mclus
 
 \item{subset}{A vector of values specifying for the selected variables the columns position in the input data.frame or matrix.}
 
-\item{steps.info}{A matrix with a row for each step of the algorithm providing:
-\tabular{ll}{
-- \tab the name of the variable proposed; \cr
-- \tab the BIC of the clustering variables' model at the end of the step; \cr
-- \tab the BIC difference between clustering and not clustering for the variable; \cr
-- \tab the type of step (Add/Remove); \cr
-- \tab the decision for the proposed step (Accepted/Rejected).
+\item{steps.info}{A matrix with a row for each step of the algorithm providing:\cr
+
+\itemize{
+\item the name of the variable proposed;
+\item the BIC of the clustering variables' model at the end of the step;
+\item the BIC difference between clustering and not clustering for the variable;
+\item the type of step (Add/Remove);
+\item the decision for the proposed step (Accepted/Rejected).
 } 
 }
 
@@ -128,7 +128,6 @@ steps run in the algorithm can be changed by using the \code{\link[mclust]{mclus
 
 \references{
 Raftery, A. E. and Dean, N. (2006) Variable Selection for Model-Based Clustering. \emph{Journal of the American Statistical Association}, 101(473), 168-178.
-\url{http://www.stat.washington.edu/www/research/reports/2004/tr452.pdf}
 
 Badsberg, J. H. (1992) Model search in contingency tables by CoCo. In Dodge, Y. and Whittaker, J. (Eds.), \emph{Computational Statistics}, Volume 1, pp. 251-256
 
@@ -137,7 +136,7 @@ Maugis, C., Celeux, G., Martin-Magniette M. (2009) Variable Selection for Cluste
 Scrucca, L. and Raftery, A. E. (2018) clustvarsel: A Package Implementing Variable Selection for Gaussian Model-based Clustering in R. \emph{Journal of Statistical Software}, 84(1), pp. 1-28.
 }
 
-\author{N. Dean, A. E. Raftery, and L. Scrucca.}
+\author{N. Dean, A. E. Raftery, and L. Scrucca}
 
 \seealso{\code{\link[mclust]{Mclust}}}
 

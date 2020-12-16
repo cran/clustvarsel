@@ -1,5 +1,6 @@
 \name{clustvarsel-internal}
 % function not documented
+\alias{print.clustvarsel}
 \alias{clvarselgrfwd}
 \alias{clvarselgrbkw}
 \alias{clvarselhlfwd}
@@ -9,12 +10,13 @@
 
 \title{Internal 'clustvarsel' functions}
 
-
 \description{
   Internal functions not intended to be called directly by users.
 }
 
 \usage{
+\method{print}{clustvarsel}(x, digits = getOption("digits"), \dots) 
+
 clvarselgrfwd(X, G = 1:9,
               emModels1 = c("E","V"), 
               emModels2 = mclust.options("emModelNames"),
@@ -51,7 +53,7 @@ clvarselhlbkw(X, G = 1:9,
 
 BICreg(x, y)
 
-startParallel(parallel = TRUE, ...)
+startParallel(parallel = TRUE, \dots)
 }
 
 \keyword{internal}

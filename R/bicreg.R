@@ -1,6 +1,5 @@
 # Computes BIC for the regression of y on x, after doing subset selection 
-# on the predictors
-# require(BMA)
+# on the predictors using BMA::bicreg
 
 BICreg <- function(x, y)
 {

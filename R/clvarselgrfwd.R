@@ -172,6 +172,7 @@ clvarselgrfwd <- function(X, G = 1:9,
     
     # Adding step
     if(verbose) cat("+ adding step\n")
+    
     # For the special case where we have removed all the clustering 
     # variables/S is empty
     if(ncol(S)==0 || is.null(ncol(S)))
