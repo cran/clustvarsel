@@ -1,3 +1,8 @@
+# clustvarsel 2.3.5 (2025-04)
+
+* Explicitly uses current value of `mclust.options("hcUse")` for initializing the EM iterative estimation process.
+* Fixed anchors in Rd `\link{}` targets that were not within the package, addressing CRAN requirements.
+
 # clustvarsel 2.3.4 (2020-12)
 
 * Bug fixes and polish.  

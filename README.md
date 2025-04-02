@@ -11,7 +11,7 @@ Variable selection for Gaussian model-based clustering as implemented in the **m
 
 You can install the released version of **clustvarsel** from CRAN using:
 
-```{r}
+```
 install.packages("clustvarsel")
 ```
 
@@ -23,7 +23,7 @@ papers shown in the references section below.
 For an intro see the vignette **A quick tour of clustvarsel**, which is available
 as
 
-```{r}
+```
 vignette("clustvarsel")
 ```
 

@@ -37,15 +37,15 @@ clustvarsel(data,
 
 \item{direction}{A character vector indicating the type of search: \code{"forward"} starts from the empty model and at each step of the algorithm adds/removes a variable until the stopping criterion is satisfied; \code{"backward"} starts from the model with all the available variables and at each step of the algorithm removes/adds a variable until the stopping criterion is satisfied.}
 
-\item{emModels1}{A vector of character strings indicating the models to be fitted in the EM phase of univariate clustering. Possible models are \code{"E"} and \code{"V"}, described in \code{\link{mclustModelNames}}.}
+\item{emModels1}{A vector of character strings indicating the models to be fitted in the EM phase of univariate clustering. Possible models are \code{"E"} and \code{"V"}, described in \code{\link[mclust]{mclustModelNames}}.}
 
-\item{emModels2}{A vector of character strings indicating the models to be fitted in the EM phase of multivariate clustering. Possible models are those described in \code{\link{mclustModelNames}}.}
+\item{emModels2}{A vector of character strings indicating the models to be fitted in the EM phase of multivariate clustering. Possible models are those described in \code{\link[mclust]{mclustModelNames}}.}
 
 \item{samp}{A logical value indicating whether or not a subset of observations is to be used in the hierarchical clustering phase used to get starting values for the EM algorithm.}
 
 \item{sampsize}{The number of observations to be used in the hierarchical clustering subset. By default, a random sample of approximately half of the sample size is used.}
 
-\item{hcModel}{A character string specifying the model to be used in hierarchical clustering for choosing the starting values used by the EM algorithm. By default, the \code{"VVV"} covariance structure is used (see \code{\link{hc}}).}
+\item{hcModel}{A character string specifying the model to be used in hierarchical clustering for choosing the starting values used by the EM algorithm. By default, the \code{"VVV"} covariance structure is used (see \code{\link[mclust]{hc}}).}
 
 \item{allow.EEE}{A logical value indicating whether a new clustering will be run with equal within-cluster covariance for hierarchical clustering to get starting values, if the clusterings with variable within-cluster covariance for hierarchical clustering do not produce any viable BIC values.}
 

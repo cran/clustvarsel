@@ -36,14 +36,16 @@ clvarselgrbkw <- function(X, G = 1:9,
 
   mod <- NULL
   try(mod <- Mclust(S, G = G, modelNames = emModels2,
-                    initialization = list(hcPairs = hc(hcModel, data = S[sub,]), 
+                    initialization = list(hcPairs = hc(hcModel, data = S[sub,],
+                                                       use = mclust.options("hcUse")), 
                                           subset = sub),
                     verbose = FALSE),
       silent = TRUE)
   # If we get all NA's from above starting hierarchical values use "EEE"
   if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
     { try(mod <- Mclust(S, G = G, modelNames = emModels2,
-                        initialization = list(hcPairs = hc("EEE", data = S[sub,]),
+                        initialization = list(hcPairs = hc("EEE", data = S[sub,],
+                                                           use = mclust.options("hcUse")),
                                               subset = sub),
                         verbose = FALSE),
           silent = TRUE)
@@ -170,7 +172,8 @@ clvarselgrbkw <- function(X, G = 1:9,
        {
          # Fit clustering model with proposed variable
          hcPairs <- hc(modelName = if(ncol(S) > 0) hcModel else hcModel1,
-                       data = cbind(S,NS[,i])[sub,])
+                       data = cbind(S,NS[,i])[sub,],
+                       use = mclust.options("hcUse"))
          try(mod <- Mclust(cbind(S,NS[,i]), G = G, 
                            modelNames = if(ncol(S) > 0) emModels2 
                                         else            emModels1,
@@ -180,7 +183,8 @@ clvarselgrbkw <- function(X, G = 1:9,
              silent = TRUE)
          # If we get all NA's from above starting hierarchical values use "EEE"
          if((allow.EEE) & (sum(is.finite(mod$BIC))==0))
-           { hcPairs <- hc(if(ncol(S) > 0) "EEE" else "E",
+           { 
+             hcPairs <- hc(if(ncol(S) > 0) "EEE" else "E",
                            data = cbind(S,NS[,i])[sub,])
              try(mod <- Mclust(cbind(S,NS[,i]), G = G, 
                                modelNames = if(ncol(S) > 0) "EEE" else "E",

@@ -309,6 +309,8 @@ summary(out2$model)
 ```
 Although the selected subset of variables is different from that obtained using forward greedy search, the same comments outlined previously apply here too.
 
+<br><br>
+
 # References
 
 Raftery, A. E. and Dean, N. (2006) Variable Selection for Model-Based Clustering. *Journal of the American Statistical Association*, 101(473), 168-178.

@@ -109,7 +109,8 @@ clvarselhlfwd <- function(X, G = 1:9,
     # Fit the cluster model on the two variables
     try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
                        initialization = list(hcPairs = hc(hcModel, 
-                                                          data = cbind(S,NS[,i])[sub,]), 
+                                                          data = cbind(S,NS[,i])[sub,],
+                                                          use = mclust.options("hcUse")), 
                                                           subset = sub),
                        verbose = FALSE),
         silent = TRUE)
@@ -117,7 +118,8 @@ clvarselhlfwd <- function(X, G = 1:9,
     if((allow.EEE) & sum(is.finite(sBIC$BIC))==0)
        try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
                           initialization = list(hcPairs = hc("EEE", 
-                                                             data = cbind(S,NS[,i])[sub,]), 
+                                                             data = cbind(S,NS[,i])[sub,],
+                                                             use = mclust.options("hcUse")), 
                                                              subset = sub),
                           verbose = FALSE),
            silent = TRUE)
@@ -325,7 +327,8 @@ clvarselhlfwd <- function(X, G = 1:9,
               # Fit the cluster model on the S variables with the proposed variable 
               try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
                                  initialization = list(hcPairs = hc(hcModel, 
-                                                                    data = cbind(S,NS[,i])[sub,]), 
+                                                                    data = cbind(S,NS[,i])[sub,],
+                                                                    use = mclust.options("hcUse")), 
                                                                     subset = sub),
                                  verbose = FALSE),
                   silent = TRUE)
@@ -459,8 +462,9 @@ clvarselhlfwd <- function(X, G = 1:9,
               try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
                                  initialization = 
                                  list(hcPairs = hc(hcModel, 
-                                                   data = S[sub,-i,drop=FALSE]), 
-                                                   subset = sub),
+                                                   data = S[sub,-i,drop=FALSE],
+                                                   use = mclust.options("hcUse")), 
+                                      subset = sub),
                                  verbose = FALSE),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
@@ -468,7 +472,7 @@ clvarselhlfwd <- function(X, G = 1:9,
                 { try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
                                      initialization = list(hcPairs = hc("EEE", 
                                                                         data = S[sub,-i]),
-                                                                        subset = sub),
+                                                           subset = sub),
                                      verbose = FALSE),
                       silent = TRUE) }
               else

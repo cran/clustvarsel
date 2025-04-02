@@ -109,14 +109,20 @@ clvarselgrfwd <- function(X, G = 1:9,
     sBIC <- NULL
     try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, 
                        modelNames = emModels2,
-                       initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub),
+                       initialization = list(hcPairs = hc(hcModel, 
+                                                          data = cbind(S,NS[,i])[sub,],
+                                                          use = mclust.options("hcUse")),
+                                             subset = sub),
                        verbose = FALSE),
         silent = TRUE)
     # If we get all NA's from "VVV" starting hierarchical values use "EEE"
     if((allow.EEE) & sum(is.finite(sBIC$BIC))==0)
        try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, 
                           modelNames = emModels2,
-                          initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]), subset = sub),
+                          initialization = list(hcPairs = hc("EEE", 
+                                                             data = cbind(S,NS[,i])[sub,],
+                                                             use = mclust.options("hcUse")), 
+                                                subset = sub),
                           verbose = FALSE),
            silent = TRUE)
     # depBIC is the BIC for the clustering model with both variables
@@ -214,23 +220,28 @@ clvarselgrfwd <- function(X, G = 1:9,
               #
               # Fit the cluster model on the S variables with the proposed 
               # variable for 2 to G groups 
-              sBIC <- NULL                 
+              sBIC <- NULL
               try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, 
                                  modelNames = emModels2,
-                                 initialization = list(hcPairs = hc(hcModel, data = cbind(S,NS[,i])[sub,]), subset = sub),
+                                 initialization = list(hcPairs = hc(hcModel, 
+                                                                    data = cbind(S,NS[,i])[sub,],
+                                                                    use = mclust.options("hcUse")), 
+                                                       subset = sub),
                                  verbose = FALSE),
                   silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values use "EEE"
               if((allow.EEE) & (sum(is.finite(sBIC$BIC))==0))
                  try(sBIC <- Mclust(cbind(S,NS[,i]), G = G, modelNames = emModels2,
-                                    initialization = list(hcPairs = hc("EEE", data = cbind(S,NS[,i])[sub,]),
+                                    initialization = list(hcPairs = hc("EEE", 
+                                                                       data = cbind(S,NS[,i])[sub,],
+                                                                       use = mclust.options("hcUse")),
                                                           subset = sub),
                                     verbose = FALSE),
                      silent = TRUE)
               # depBIC is the BIC for the clustering model with both S
               # and proposed variable
-              depBIC <- if(sum(is.finite(sBIC$BIC))==0) NA 
-                        else max(sBIC$BIC[is.finite(sBIC$BIC)])
+              depBIC <- if(sum(is.finite(sBIC$BIC))==0) 
+                          NA else max(sBIC$BIC[is.finite(sBIC$BIC)])
               #
               return(list(regBIC, depBIC, sBIC$modelName, sBIC$G))
             }
@@ -275,7 +286,9 @@ clvarselgrfwd <- function(X, G = 1:9,
         cdiff <- 0
         oneMod <- NA
         try(oneMod <- Mclust(as.matrix(S), G = 1, modelNames = emModels1,
-                             initialization = list(hcPairs = hc(hcModel1, data = S[sub,]), 
+                             initialization = list(hcPairs = hc(hcModel1, 
+                                                                data = S[sub,],
+                                                                use = mclust.options("hcUse")), 
                                                    subset = sub),
                              verbose = FALSE),
             silent = TRUE)
@@ -323,19 +336,22 @@ clvarselgrfwd <- function(X, G = 1:9,
                                  modelNames = name,
                                  initialization = list(hcPairs = hc(hcname, 
                                                                     # data = cbind(S,NS[,i])[sub,]), # LS 20170112 ??
-                                                        data = S[sub,-i,drop=FALSE]), 
-                                                        subset = sub),
+                                                                    data = S[sub,-i,drop=FALSE],
+                                                                    use = mclust.options("hcUse")),
+                                                       subset = sub),
                                  verbose = FALSE),
-                   silent = TRUE)
+                  silent = TRUE)
               # If we get all NA's from "VVV" starting hierarchical values 
               # use "EEE"
               if((allow.EEE) & ncol(S)>=3 & sum(is.finite(sBIC$BIC))==0)
                 { try(sBIC <- Mclust(S[,-i], G = G, modelNames = name,
-                                     initialization = list(hcPairs = hc("EEE", data = S[sub,-i,drop=FALSE]),
+                                     initialization = list(hcPairs = hc("EEE", 
+                                                                        data = S[sub,-i,drop=FALSE],
+                                                                        use = mclust.options("hcUse")),
                                                            subset = sub),
                                      verbose = FALSE),
                       silent = TRUE) }
-               else
+              else
                  { if((allow.EEE) & ncol(S)==2 & sum(is.finite(sBIC$BIC))==0)
                      { try(sBIC <- Mclust(as.matrix(S[,-i]), G = G, modelNames = name,
                                           initialization = list(hcPairs = hcE(S[sub,-i,drop=FALSE]), 
